@@ -12,24 +12,24 @@ import json
 import os
 import unicodedata as ud
 
-re_main_parts = re.compile(ur"^~t96;【(?P<entry>[^】]+)】~(fd6)?t84;(?P<definition>.*)$",re.U)
+re_main_parts = re.compile(r"^~t96;【(?P<entry>[^】]+)】~(fd6)?t84;(?P<definition>.*)$",re.U)
 
-re_kai_font = re.compile(ur"~fk;",re.U)
-re_ming_font = re.compile(ur"~fm3;",re.U)
+re_kai_font = re.compile(r"~fk;",re.U)
+re_ming_font = re.compile(r"~fm3;",re.U)
 
-re_change_font = re.compile(ur"~fk[a-z0-9]*;(.*?)~fm3[a-z0-9]*;",re.U)
+re_change_font = re.compile(r"~fk[a-z0-9]*;(.*?)~fm3[a-z0-9]*;",re.U)
 
-re_special_chars = re.compile(ur"~[a-z0-9]+;",re.U)
+re_special_chars = re.compile(r"~[a-z0-9]+;",re.U)
 
-re_definition = re.compile(ur"^(?P<nhomonym>[0-9]+ )?(?P<POS>\[[^\]]+\])?(?P<body>.*)$")
+re_definition = re.compile(r"^(?P<nhomonym>[0-9]+ )?(?P<POS>\[[^\]]+\])?(?P<body>.*)$")
 
-re_lang = re.compile(ur"\((台|國語)\)",re.U)
+re_lang = re.compile(r"\((台|國語)\)",re.U)
 
-re_zhuyin = re.compile(ur"[\u3105-\u31ba]",re.U)
+re_zhuyin = re.compile(r"[\u3105-\u31ba]",re.U)
 
 
 private_to_unicode = json.load(open(os.path.dirname(__file__) + "/mapping.json"))
-re_fk = re.compile(ur"<k>.*?</k>", re.U)
+re_fk = re.compile(r"<k>.*?</k>", re.U)
 def replace_privates(s):
     m = re_fk.search(s)
     while m:
@@ -44,7 +44,7 @@ def confirm_taigi(sentence):
     Check if each sinogram in a sentence is
     followed by a zhuyin annotation
     """
-    for i,char in enumerate(unicode(sentence)[:-1]):
+    for i,char in enumerate(sentence[:-1]):
         try:
             if ud.name(char).startswith("CJK "):
                 next_code = ord(sentence[i+1])
