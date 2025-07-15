@@ -16,6 +16,10 @@ initial_map_tl_to_bopo = {
     'ts': 'ㄗ', 'tsh': 'ㄘ', 's': 'ㄙ', 'j': 'ㆡ',
     'tsi': 'ㄐ', 'tshi': 'ㄑ', 'si': 'ㄒ', 'ji': 'ㆢ',
     '': '',  # 代表無聲母
+    
+    # 非台語
+    'f': 'ㄈ', 
+    'zh': 'ㄓ', 'ch': 'ㄔ', 'sh': 'ㄕ', 'r': 'ㄖ',
 }
 
 # 臺灣閩南語羅馬字拼音對照吳守禮方音韻母表
@@ -52,6 +56,11 @@ final_map_tl_to_bopo = {
     'iunnh': 'ㄧㆫㆷ', 'iaunnh': 'ㄧㆯㆷ', 'uennh': 'ㄨㆥㆷ', 'uinnh': 'ㄨㆪㆷ', 'uainnh': 'ㄨㆮㆷ',
     'iut': 'ㄧㄨㆵ', 'uak': 'ㄨㄚㆶ', 'onnh': 'ㆧㆷ',
     'oi': 'ㆦㄧ', 'oih': 'ㆦㄧㆷ',
+
+    # 非台語
+    'en': 'ㄣ', 'ong': 'ㄥ',
+    'er': 'ㄦ',
+    '': '',  # 代表無韻母
 }
 
 # 臺灣閩南語羅馬字拼音對照吳守禮方音聲調表
@@ -241,7 +250,7 @@ def convert_bopo_to_tl(bopo_string):
             # 如果找不到韻母，可能代表輸入有誤或已到字串結尾
             # 為避免無限迴圈，移動到下一個字符
             if i < len(bopo_string):
-                # print(f"警告：在 '{bopo_string}' 的位置 {i} 找不到對應的韻母。")
+                print(f"警告：在 '{bopo_string}' 的位置 {i} 找不到對應的韻母。", file=sys.stderr)
                 i += 1
             continue
 
@@ -289,11 +298,16 @@ def process_entry(data):
                 # Join the found pronunciations into a single string
                 if len(pronunciations) > 0:
                     data['pronun_bopo'] = "-".join(pronunciations)
-                    pronun_tl, pronun_poj = convert_bopo_to_tl(data['pronun_bopo'])
-                    if pronun_tl.strip() != "":
-                        data['pronun_tl'] = pronun_tl
-                    if pronun_poj.strip() != "":
-                        data['pronun_poj'] = pronun_poj
+                    pronun_tl_list = []
+                    pronun_poj_list = []
+                    for pronun in pronunciations:
+                        pronun_tl, pronun_poj = convert_bopo_to_tl(pronun)
+                        pronun_tl_list.append(pronun_tl)
+                        pronun_poj_list.append(pronun_poj)
+                    if len(pronun_tl_list) > 0:
+                        data['pronun_tl'] = "-".join(pronun_tl_list)
+                    if len(pronun_poj_list) > 0:
+                        data['pronun_poj'] = "-".join(pronun_poj_list)
                 
                 # NOTE DEPRECATED Group version but not working
                 # pattern = r'((?:<rt>.*?</rt>)+)'
