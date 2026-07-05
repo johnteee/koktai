@@ -28,7 +28,7 @@ final_map_tl_to_bopo = {
     'ai': 'ㄞ', 'au': 'ㄠ', 'ia': 'ㄧㄚ',
     'io': 'ㄧㄜ', 'iu': 'ㄧㄨ', 'ua': 'ㄨㄚ', 'ue': 'ㄨㆤ', 'ui': 'ㄨㄧ',
     'iau': 'ㄧㄠ', 'uai': 'ㄨㄞ',
-    'ann': 'ㆩ', 'enn': 'ㆥ', 'inn': 'ㆪ', 'onn': 'ㆲ',
+    'ann': 'ㆩ', 'enn': 'ㆥ', 'inn': 'ㆪ', 'onn': 'ㆧ',
     'm': 'ㆬ', 'ng': 'ㆭ', 'ainn': 'ㆮ', 'iann': 'ㄧㆩ', 'iaunn': 'ㄧㆯ',
     'iunn': 'ㄧㆫ', 'uann': 'ㄨㆩ', 'uannh': 'ㄨㆩㆷ', 'uainn': 'ㄨㆮ',
     'am': 'ㆰ', 'an': 'ㄢ', 'ang': 'ㄤ',
@@ -36,7 +36,7 @@ final_map_tl_to_bopo = {
     'om': 'ㆱ', 'ong': 'ㆲ', 'iam': 'ㄧㆰ',
     'ian': 'ㄧㄢ', 'iang': 'ㄧㄤ', 'iong': 'ㄧㆲ',
     'un': 'ㄨㄣ', 'uan': 'ㄨㄢ',
-    'ah': 'ㄚㆷ', 'eh': 'ㆤㆷ', 'ih': 'ㄧㆷ', 'oh': 'ㄜㆷ', 'uh': 'ㄨ', 'auh': 'ㄠㆷ', 'iah': 'ㄧㄚㆷ',
+    'ah': 'ㄚㆷ', 'eh': 'ㆤㆷ', 'ih': 'ㄧㆷ', 'oh': 'ㄜㆷ', 'uh': 'ㄨㆷ', 'auh': 'ㄠㆷ', 'iah': 'ㄧㄚㆷ',
     'ioh': 'ㄧㄜㆷ', 'iuh': 'ㄧㄨㆷ', 'iauh': 'ㄧㄠㆷ',
     'uah': 'ㄨㄚㆷ', 'ueh': 'ㄨㆤㆷ', 'ooh': 'ㆦㆷ',
     'annh': 'ㆩㆷ', 'ennh': 'ㆥㆷ', 'innh': 'ㆪㆷ', 'mh': 'ㆬㆷ', 'iannh': 'ㄧㆩㆷ', 'ngh': 'ㆭㆷ',
@@ -57,9 +57,8 @@ final_map_tl_to_bopo = {
     'iut': 'ㄧㄨㆵ', 'uak': 'ㄨㄚㆶ', 'onnh': 'ㆧㆷ',
     'oi': 'ㆦㄧ', 'oih': 'ㆦㄧㆷ',
 
-    # 非台語
-    'en': 'ㄣ', 'ong': 'ㄥ',
-    'er': 'ㄦ',
+    # 注意：勿在此加入與台語鍵重複的「非台語」鍵（v1 的 'ong':'ㄥ'、'er':'ㄦ'
+    # 曾覆蓋 'ong':'ㆲ'、'er':'ㄮ'，導致所有 ㆲ 韻被反查成 onn）。
     '': '',  # 代表無韻母
 }
 
@@ -97,6 +96,9 @@ bopo_to_initial_map = {v: k.replace('i', '') for k, v in initial_map_tl_to_bopo.
 
 # 移除空值並反轉韻母表
 bopo_to_final_map = {v: k for k, v in final_map_tl_to_bopo.items() if v}
+
+# 吳守禮寫法補充（僅反查方向）：ㄧㆤㆶ=ik、ㄮ=er(泉腔)、ㄦ 併入 er
+bopo_to_final_map.update({'ㄧㆤㆶ': 'ik', 'ㄮ': 'er', 'ㄦ': 'er'})
 
 # 處理聲調對照表的重複值，建立唯一的反向對照
 bopo_to_tone_map = {
@@ -221,145 +223,247 @@ class 臺羅轉白話字():
 
 tl2poj_converter = 臺羅轉白話字()
 
-def convert_bopo_to_tl(bopo_string):
+# 國語專用符號（台語方音不用）→ 用於分類 ruby 語言
+MANDARIN_ONLY = set('ㄓㄔㄕㄖㄦㄩㄟㄡㄈ')
+TONE8_DOT = '\u0358'   # ◌ ͘ 第8調（陽入）右上點
+
+
+def analyze_bopo(bopo_string):
+    """方音字串（可多音節）→ 分析結果 dict。
+
+    回傳:
+      {"lang": "nan",     "tl": …, "poj": …}            台語，全部轉出
+      {"lang": "partial", "tl": …, "poj": …, "errors"}  部分轉出
+      {"lang": "cmn"}                                    國語注音（不轉台羅）
+      {"lang": "unknown", "errors": […]}                 無法解析
     """
-    將單一的方音字串轉換為台羅拼音。
-    """
-    result_tl = []
-    result_poj = []
+    s = bopo_string.replace('〾', '')
+    if 'ˇ' in s or any(c in MANDARIN_ONLY for c in s):
+        return {'lang': 'cmn'}
+
+    tls, pojs, errors = [], [], []
     i = 0
-    while i < len(bopo_string):
-        # 步驟 1: 尋找聲母
+    pending_neutral = False
+    while i < len(s):
+        ch = s[i]
+        if ch in ' \u3000\u00a0':
+            i += 1
+            continue
+        if ch == '˙':                      # 前置輕聲點
+            pending_neutral = True
+            i += 1
+            continue
+        if ch == TONE8_DOT:                # 游離的第8調點
+            i += 1
+            continue
+
         roman_initial = ''
-        # 檢查當前字符是否為聲母
-        if bopo_string[i] in bopo_to_initial_map:
-            roman_initial = bopo_to_initial_map[bopo_string[i]]
+        if s[i] in bopo_to_initial_map:
+            roman_initial = bopo_to_initial_map[s[i]]
             i += 1
 
-        # 步驟 2: 尋找韻母 (使用最長匹配原則)
         roman_final = ''
         found_final = False
-        for final in sorted_bopo_finals:
-            if bopo_string[i:].startswith(final):
+        for final in sorted_bopo_finals:   # 最長匹配
+            if s.startswith(final, i):
                 roman_final = bopo_to_final_map[final]
                 i += len(final)
                 found_final = True
                 break
-        
         if not found_final:
-            # 如果找不到韻母，可能代表輸入有誤或已到字串結尾
-            # 為避免無限迴圈，移動到下一個字符
-            if i < len(bopo_string):
-                print(f"警告：在 '{bopo_string}' 的位置 {i} 找不到對應的韻母。", file=sys.stderr)
-                i += 1
+            errors.append(f'{bopo_string}@{i}')
+            i += 1
             continue
 
-        # 步驟 3: 尋找聲調符號
+        # 聲調：容許「(空白)◌ ͘」= 第8調
         tone_number = ''
-        if i < len(bopo_string) and bopo_string[i] in bopo_to_tone_map:
-            tone_number = bopo_to_tone_map[bopo_string[i]]
+        j = i
+        while j < len(s) and s[j] in ' \u3000\u00a0':
+            j += 1
+        if j < len(s) and s[j] == TONE8_DOT:
+            tone_number = '8'
+            i = j + 1
+        elif i < len(s) and s[i] in bopo_to_tone_map:
+            tone_number = bopo_to_tone_map[s[i]]
             i += 1
+        elif roman_final.endswith(('p', 't', 'k', 'h')):
+            tone_number = '4'
         else:
-            # 步驟 4: 若無聲調符號，套用預設聲調規則
-            # 檢查是否為入聲 (以 p, t, k, h 結尾)
-            if roman_final.endswith(('p', 't', 'k', 'h')):
-                tone_number = '4'
+            tone_number = '1'
+        if pending_neutral:
+            tone_number = '0'
+            pending_neutral = False
+
+        tls.append(f'{roman_initial}{roman_final}{tone_number}')
+        pojs.append(tl2poj_converter.轉白話字(
+            roman_initial, roman_final, tone_number))
+
+    if not tls:
+        return {'lang': 'unknown', 'errors': errors or ['empty']}
+    out = {'lang': 'partial' if errors else 'nan',
+           'tl': '-'.join(tls), 'poj': '-'.join(pojs)}
+    if errors:
+        out['errors'] = errors
+    return out
+
+
+def convert_bopo_to_tl(bopo_string):
+    """相容包裝：回傳 (tl, poj)；非台語/無法解析 → ('', '')。"""
+    a = analyze_bopo(bopo_string)
+    return a.get('tl', ''), a.get('poj', '')
+
+
+
+RT_TOKEN_RE = re.compile(
+    r"(?P<rt><rt>(?P<ruby>.*?)</rt>)"
+    r"|(?P<glyph><glyph:(?P<gid>[^>]+)>)"
+    r"|(?P<mark><mark>&#x(?P<mhex>[0-9a-fA-F]+);</mark>)"
+    r"|(?P<char>.)",
+    re.S)
+
+HAN_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002FFFF\u2460-\u2473\ufffd]")
+
+
+def tokenize_ruby(text):
+    """帶 <rt> 標記文字 → 對齊 tokens（漢字↔方音↔台羅↔白話字）。
+
+    規則：
+      * <rt> 附著於其前最近的基底單位（漢字／<mark>字形／<glyph:…>）。
+      * 「／<rt>…」「/(替字)<rt>…」視為前一 token 的又讀。
+      * 「·」（輕聲點）記於 token.neutral。
+      * 無法對齊的 <rt> 進 token(han=None) —— 不丟。
+    """
+    tokens = []
+    base = None          # 待附著基底：(kind, value)
+    pending_alt = False  # 前一個非空白字元是「/」
+    pending_neutral = False
+
+    def new_token(ruby):
+        t = {"han": base[1] if base else None,
+             "kind": base[0] if base else None,
+             "ruby": [ruby]}
+        if pending_neutral:
+            t["neutral"] = True
+        tokens.append(t)
+
+    for m in RT_TOKEN_RE.finditer(text):
+        if m.group("rt"):
+            ruby = m.group("ruby")
+            if pending_alt and tokens and base is None:
+                tokens[-1]["ruby"].append(ruby)      # 又讀
+            elif base is None and tokens and tokens[-1]["kind"] is None:
+                tokens[-1]["ruby"].append(ruby)
             else:
-                tone_number = '1'
+                new_token(ruby)
+            base = None
+            pending_alt = False
+            pending_neutral = False
+            continue
+        if m.group("glyph"):
+            base = ("glyph", m.group("gid"))
+            pending_alt = False
+            continue
+        if m.group("mark"):
+            base = ("pua", "&#x%s;" % m.group("mhex").lower())
+            pending_alt = False
+            continue
+        ch = m.group("char")
+        if ch == "/":
+            pending_alt = True
+            continue
+        if ch == "·":
+            pending_neutral = True
+            continue
+        if HAN_RE.match(ch):
+            base = ("han", ch)
+            pending_alt = False
+            pending_neutral = False
+        elif ch.strip() and ch not in "()（）":
+            base = None
+            pending_alt = False
+    return tokens
 
-        result_tl.append(f"{roman_initial}{roman_final}{tone_number}")
-        result_poj.append(tl2poj_converter.轉白話字(roman_initial, roman_final, tone_number))
 
-    return "-".join(result_tl), "-".join(result_poj)
+def enrich_tokens(tokens):
+    for t in tokens:
+        t["pron"] = [analyze_bopo(r) for r in t["ruby"]]
+        langs = {p["lang"] for p in t["pron"]}
+        t["lang"] = ("nan" if langs & {"nan", "partial"} else
+                     "cmn" if "cmn" in langs else "unknown")
+    return tokens
 
+
+def annotate_text_field(data, key):
+    """v1 相容欄位（pronun_*）＋ v2 保真欄位（*_ruby, tokens）。"""
+    original = data[key]
+    pronunciations = re.findall(r"<rt>(.*?)</rt>", original)
+    if not pronunciations:
+        return
+    data[key + "_ruby"] = original                     # 保真：對齊原文
+    data["pronun_bopo"] = "-".join(pronunciations)
+    analyses = [analyze_bopo(p) for p in pronunciations]
+    tl_flat = [a.get("tl", "") for a in analyses]
+    poj_flat = [a.get("poj", "") for a in analyses]
+    if any(tl_flat):
+        data["pronun_tl"] = "-".join(tl_flat)
+        data["pronun_poj"] = "-".join(poj_flat)
+    data["tokens"] = enrich_tokens(tokenize_ruby(original))
+    data[key] = re.sub(r"<rt>.*?</rt>", "", original)
+
+
+def annotate_reading_segments(readings):
+    """單字讀音列之方音字形 → 台羅/白話字（國音列僅保留注音）。"""
+    for label, recs in readings.items():
+        for rec in recs:
+            for seg in rec.get("segments", []):
+                for g in seg.get("glyphs", []):
+                    bopo = g.get("bopo")
+                    if bopo and label != "國音":
+                        a = analyze_bopo(bopo)
+                        g["lang"] = a["lang"]
+                        if "tl" in a:
+                            g["tl"], g["poj"] = a["tl"], a["poj"]
+
+
+def annotate_head(head):
+    if not head:
+        return
+    for g in head.get("ruby", []):
+        if g.get("bopo"):
+            a = analyze_bopo(g["bopo"])
+            g["lang"] = a["lang"]
+            if "tl" in a:
+                g["tl"], g["poj"] = a["tl"], a["poj"]
 
 
 def process_entry(data):
-    """
-    Processes a list of dictionary entries to extract pronunciation
-    from <rt> tags and create a new 'pronun_fang' field.
-    
-    This function recursively processes nested structures.
-    """
+    """遞迴處理：v2 樹（chapters/hanzi_entries）與 v1 list 皆可。"""
     if isinstance(data, list):
-        # If the data is a list, process each item in the list
         for item in data:
             process_entry(item)
     elif isinstance(data, dict):
-        # If the data is a dictionary, look for the keys
-        keys = ['entry', 'sentence']
-        for key in keys:
+        if "readings" in data and isinstance(data["readings"], dict):
+            annotate_reading_segments(data["readings"])
+        if "head" in data and isinstance(data["head"], dict):
+            annotate_head(data["head"])
+        for key in ("entry", "sentence"):
             if key in data and isinstance(data[key], str):
-                original_entry = data[key]
-                
-                # Find all content within <rt>...</rt> tags
-                # The re.findall function returns a list of all matches
-                pronunciations = re.findall(r'<rt>(.*?)</rt>', original_entry)
-                # Join the found pronunciations into a single string
-                if len(pronunciations) > 0:
-                    data['pronun_bopo'] = "-".join(pronunciations)
-                    pronun_tl_list = []
-                    pronun_poj_list = []
-                    for pronun in pronunciations:
-                        pronun_tl, pronun_poj = convert_bopo_to_tl(pronun)
-                        pronun_tl_list.append(pronun_tl)
-                        pronun_poj_list.append(pronun_poj)
-                    if len(pronun_tl_list) > 0:
-                        data['pronun_tl'] = "-".join(pronun_tl_list)
-                    if len(pronun_poj_list) > 0:
-                        data['pronun_poj'] = "-".join(pronun_poj_list)
-                
-                # NOTE DEPRECATED Group version but not working
-                # pattern = r'((?:<rt>.*?</rt>)+)'
-                # pronunciationsGroups = re.findall(pattern, original_entry)
-                # # print("pronunciationsGroups", pronunciationsGroups, file=sys.stderr)
-                # # Join the found pronunciations into a single string
-                # if len(pronunciationsGroups) > 0:
-                #     for pronunciationsGroup in pronunciationsGroups:
-                #         pronunciations = re.findall(r'<rt>(.*?)</rt>', pronunciationsGroup)
-                #         if len(pronunciations) > 0 and 'pronun_fang' not in data:
-                #             data['pronun_fang'] = ""
-                #         data['pronun_fang'] = data['pronun_fang'] + "" + "".join(pronunciations)
-                
-                # Remove the <rt>...</rt> tags from the original entry string
-                # The re.sub function replaces the matched patterns with an empty string
-                data[key] = re.sub(r'<rt>.*?</rt>', '', original_entry)
-
-        # Recursively process any other dictionary values
-        for key, value in data.items():
+                annotate_text_field(data, key)
+        for value in data.values():
             if isinstance(value, (dict, list)):
                 process_entry(value)
 
+
 def main():
-    """
-    Main function to read from stdin, process the data,
-    and print the result to stdout.
-    """
-    try:
-        # Load the entire JSON input from standard input
-        # data = json.load(sys.stdin)
-        # Read raw bytes from stdin to handle file encodings correctly.
-        raw_data = sys.stdin.buffer.read()
-        
-        # Decode as UTF-8 (the standard for JSON).
-        decoded_data = raw_data.decode('utf-8')
-        decoded_data = re.sub(r'<img src="(.*?)"\s*>', r'\1', decoded_data)
+    raw_data = sys.stdin.buffer.read()
+    decoded_data = raw_data.decode("utf-8")
+    # 舊管線殘留的 <img> 造字圖 → 結構化 glyph 標記
+    decoded_data = re.sub(r'<img src="img/(.*?)\.png"\s*>', r"<glyph:\1>",
+                          decoded_data)
+    data = json.loads(decoded_data)
+    process_entry(data)
+    print(json.dumps(data, ensure_ascii=False, indent=1))
 
-        data = json.loads(decoded_data)
-        
-        # Process the loaded data
-        process_entry(data)
-        
-        # Dump the modified JSON data to standard output
-        # ensure_ascii=False is crucial for correct UTF-8 output
-        # indent=2 makes the output human-readable
-        print(json.dumps(data, ensure_ascii=False, indent=2))
-
-    except json.JSONDecodeError:
-        sys.stderr.write("Error: Invalid JSON format provided.\n")
-    except Exception as e:
-        sys.stderr.write(f"An unexpected error occurred: {e}\n")
-        print(e.stacktrace, file=sys.stderr)
 
 if __name__ == "__main__":
     main()
