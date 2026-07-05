@@ -1,6 +1,28 @@
 # `ExternalRef/` 外部文件盤點
 
-王庚春（NatureRoger）「台語漢文輔助系統」相關文件六件。逐件記錄可用性與本專案取用方式。
+王庚春（NatureRoger）「台語漢文輔助系統」相關文件六件，＋ ChhoeTaigi 開放辭典
+資料庫一組。逐件記錄可用性與本專案取用方式。
+
+## 0. ChhoeTaigiDatabase/ ★ 已取用（佐證層＋黃金測試）
+
+- ChhoeTaigi 開放台語辭典資料庫（MIT/CC 授權開放資料）之 CSV 快照，11 部：
+  教育部台語辭典（教）、台華線頂對照典（線）、iTaigi（iT）、台日大辭典（日）、
+  甘字典（甘；含**漢文音**欄）、白話基礎語句集（基）、台灣植物名彙（植）、
+  Embree（Em）、Maryknoll（Mk）、教育部 700 用字（700）、台語千詞（千）。
+- 欄位慣例：`PojUnicode`（白話字調符式）↔ `PojInput`（數字調）、
+  `KipUnicode` ↔ `KipInput`（教育部台羅）、`HanLoTaibunKip/Poj`（台文漢字）、
+  `HoaBun`（華文——**只可作華台對照，絕不可拿來對齊音節**）。
+- **取用一（佐證）**：`a-tsioh_sandbox/chhoetaigi.py` 把「台文漢字↔KipInput」
+  逐位對齊成 27,290 組 (漢字,台羅) 佐證對，進統一索引的 `attest`/`w` 欄
+  （見 unified-index.md）。
+- **取用二（黃金測試）**：`KipInput↔PojUnicode` 平行欄抽 3,638 音節對，
+  驗證並修正我們的台羅→白話字轉換（見 bopo-tl-methodology.md）。
+- 相關專案 `~/dev/ch2taigi/`（華→台翻譯網頁工具，同作者資料源）：
+  取其**方法**——多辭典聚合去重、`權重 = 重複數 + 辭典優先序×2`
+  （`calcWordWeightAndDeduplication`）、最長前綴貪婪斷詞（華文段最長 4 字）。
+  權重法已移植入索引排序；斷詞法備用（koktai 詞條已自帶國台對照，暫無需求）。
+- 界限：taigi1000 表頭殘缺（讀音三欄無欄名）不取；各辭典 POJ 拼式有家法
+  （Embree 尾字母標調、甘典偶留 ik）——黃金測試殘差已逐類歸因。
 
 ## 1. 平水韻注音符號編碼.pdf ★ 已取用
 

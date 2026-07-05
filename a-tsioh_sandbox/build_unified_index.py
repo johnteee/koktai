@@ -26,6 +26,8 @@ import sys
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+from chhoetaigi import DICT_WEIGHT, load_attestation, DEFAULT_DIR as CT_DIR
 HAN_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002FFFF]")
 
 
@@ -306,19 +308,30 @@ def collect_volume(vol_id, data, coll, ytenx, ps):
 
 
 # ---------------------------------------------------------------- 輸出
-def build_outputs(coll, out_dir, meta):
+def build_outputs(coll, out_dir, meta, attest=None):
     han = defaultdict(lambda: {"mandarin": [], "taigi": [], "mc": []})
     tl_index = defaultdict(list)
 
+    att_pairs = att_tokens = tot_tokens = 0
     for (ch, tl), p in coll.pairs.items():
-        han[ch]["taigi"].append({
+        tags = sorted(attest.get((ch, tl), ())) if attest else []
+        w = p["n"] + sum(DICT_WEIGHT.get(t, 0) for t in tags)
+        tot_tokens += p["n"]
+        if tags:
+            att_pairs += 1
+            att_tokens += p["n"]
+        rec = {
             "tl": tl,
             "bopo": sorted(p["bopo"]),
             "poj": sorted(p["poj"]),
             "registers": sorted(p["regs"]),
             "n": p["n"],
+            "w": w,
             "sources": p["src"],
-        })
+        }
+        if tags:
+            rec["attest"] = tags
+        han[ch]["taigi"].append(rec)
     for ch, zy in coll.mandarin.items():
         han[ch]["mandarin"] = sorted(zy)
     for ch, mcs in coll.mc.items():
@@ -335,17 +348,27 @@ def build_outputs(coll, out_dir, meta):
         han[ch]["mc"] = out
 
     for ch in han:
-        han[ch]["taigi"].sort(key=lambda r: -r["n"])
+        han[ch]["taigi"].sort(key=lambda r: (-r["w"], -r["n"]))
         bu = sorted({e["pingshui"]["bu"] for e in han[ch]["mc"]
                      if "pingshui" in e})
         if bu:
             han[ch]["pingshui"] = bu
         for r in han[ch]["taigi"]:
-            tl_index[r["tl"]].append(
-                {"han": ch, "n": r["n"], "registers": r["registers"]})
+            e = {"han": ch, "n": r["n"], "w": r["w"],
+                 "registers": r["registers"]}
+            if "attest" in r:
+                e["attest"] = r["attest"]
+            tl_index[r["tl"]].append(e)
 
     for syl in tl_index:
-        tl_index[syl].sort(key=lambda r: -r["n"])
+        tl_index[syl].sort(key=lambda r: (-r["w"], -r["n"]))
+
+    if attest is not None:
+        meta["stats"]["attest_pairs"] = att_pairs
+        meta["stats"]["attest_pair_pct"] = round(
+            att_pairs / max(len(coll.pairs), 1) * 100, 1)
+        meta["stats"]["attest_token_pct"] = round(
+            att_tokens / max(tot_tokens, 1) * 100, 1)
 
     os.makedirs(out_dir, exist_ok=True)
     uni = {
@@ -359,12 +382,13 @@ def build_outputs(coll, out_dir, meta):
 
     with open(os.path.join(out_dir, "han_to_tl.tsv"), "w",
               encoding="utf-8") as f:
-        f.write("#漢字\t台羅\t方音\t白話字\t語域\t次數\t例源\n")
+        f.write("#漢字\t台羅\t方音\t白話字\t語域\t次數\t權重\t佐證\t例源\n")
         for ch in sorted(han):
             for r in han[ch]["taigi"]:
                 f.write("\t".join([
                     ch, r["tl"], "/".join(r["bopo"]), "/".join(r["poj"]),
-                    "/".join(r["registers"]), str(r["n"]),
+                    "/".join(r["registers"]), str(r["n"]), str(r["w"]),
+                    ",".join(r.get("attest", [])),
                     ";".join(r["sources"][:3])]) + "\n")
 
     with open(os.path.join(out_dir, "tl_to_han.tsv"), "w",
@@ -374,6 +398,24 @@ def build_outputs(coll, out_dir, meta):
             f.write(syl + "\t" + " ".join(
                 r["han"] for r in tl_index[syl]) + "\n")
 
+    if attest is not None:
+        gaps = [(ch, r) for ch, v in han.items() for r in v["taigi"]
+                if "attest" not in r and r["n"] >= 10]
+        gaps.sort(key=lambda x: -x[1]["n"])
+        with open(os.path.join(out_dir, "chhoetaigi_gaps.tsv"), "w",
+                  encoding="utf-8") as f:
+            f.write("#高頻但無 ChhoeTaigi 佐證的讀音對（轉換問題或 koktai 特有讀）\n"
+                    "#漢字\t台羅\t次數\t方音\t語域\t例源\n")
+            for ch, r in gaps:
+                f.write("\t".join([
+                    ch, r["tl"], str(r["n"]), "/".join(r["bopo"]),
+                    "/".join(r["registers"]),
+                    ";".join(r["sources"][:3])]) + "\n")
+        print(f"[index] ChhoeTaigi 佐證：{meta['stats']['attest_pairs']} 對 "
+              f"（對 {meta['stats']['attest_pair_pct']}% / "
+              f"token {meta['stats']['attest_token_pct']}%）；"
+              f"高頻缺口 {len(gaps)} 筆 → chhoetaigi_gaps.tsv", file=sys.stderr)
+
     return uni
 
 
@@ -382,11 +424,19 @@ def main():
     ap.add_argument("--json", default="json/*.json")
     ap.add_argument("--ytenx", default=os.path.expanduser("~/dev/ytenx"))
     ap.add_argument("--out", default="index")
+    ap.add_argument("--chhoetaigi", default=CT_DIR,
+                    help="ChhoeTaigi CSV 目錄；不存在時自動略過佐證層")
     args = ap.parse_args()
 
     ytenx = Ytenx(args.ytenx)
     ps = Pingshui()
     coll = Collector()
+
+    attest = None
+    if os.path.isdir(args.chhoetaigi):
+        attest, att_stats = load_attestation(args.chhoetaigi)
+        print(f"[index] ChhoeTaigi 佐證表：{att_stats['pairs']} (漢字,台羅) 對",
+              file=sys.stderr)
 
     files = sorted(glob.glob(args.json))
     vols = []
@@ -412,10 +462,13 @@ def main():
             "ytenx_kyonh": "廣韻小韻/單字表（韻典網資料）",
             "ytenx_tcenghyonhtsen": "洪武正韻牋小韻表（韻典網資料）",
             "pingshui": "ExternalRef/平水韻注音符號編碼.pdf（王庚春）",
+            "chhoetaigi": None if attest is None else
+                "ExternalRef/ChhoeTaigiDatabase/（ChhoeTaigi 開放辭典 CSV；"
+                "佐證標籤=辭典，權重法仿 ch2taigi）",
         },
         "stats": dict(coll.stats),
     }
-    uni = build_outputs(coll, args.out, meta)
+    uni = build_outputs(coll, args.out, meta, attest=attest)
 
     n_han = len(uni["han"])
     n_tl = len(uni["tl"])

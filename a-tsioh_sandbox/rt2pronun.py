@@ -4,6 +4,7 @@
 import sys
 import json
 import re
+import unicodedata
 
 
 # --- 對照表定義 ---
@@ -168,6 +169,12 @@ class 臺羅轉白話字():
             白話字韻 = 韻.replace('ue', 'oe')
         elif 'ing' in 韻 or 'ik' in 韻:
             白話字韻 = 韻.replace('i', 'e')
+        elif 'ir' in 韻:
+            白話字韻 = 韻.replace('ir', 'ṳ')       # 泉腔（ChhoeTaigi 擴充白話字慣例）
+        elif 'er' in 韻:
+            白話字韻 = 韻.replace('er', 'o\u0324')  # 泉腔 o̤
+        elif 'or' in 韻:
+            白話字韻 = 韻.replace('or', 'o\u0324')  # ㄛ：ChhoeTaigi 同記 o̤
         else:
             # oo, au, ia, ai
             白話字韻 = 韻
@@ -178,48 +185,70 @@ class 臺羅轉白話字():
             白話字韻 = 白話字韻.replace('nn', 'ⁿ')
         return 白話字韻
 
+    母音字母 = set('aeiouṳ')
+    調符組合符 = {'2': '\u0301', '3': '\u0300', '5': '\u0302', '6': '\u030c',
+                  '7': '\u0304', '8': '\u030d', '9': '\u0306'}
+
+    @staticmethod
+    def _韻單位(白話字韻):
+        """拆成標調單位：基底字母＋附著記號（o͘ 的 ͘、o̤ 的 ̤）。"""
+        單位 = []
+        for 字 in 白話字韻:
+            if 單位 and 字 in ('\u0358', '\u0324'):
+                單位[-1] += 字
+            else:
+                單位.append(字)
+        return 單位
+
+    @classmethod
+    def _取標調位(cls, 單位):
+        """標調位規則（以 ChhoeTaigi PojUnicode 黃金對驗證）：
+        o͘ 最優先；三元音 iau/oai 標 a；i 開頭雙元音標第二母音；
+        oa/oe 有子音韻尾（h/p/t/k/m/n/ng，鼻化 ⁿ 不算）標 a/e、無則標 o；
+        其餘雙元音（ai/au/ui…）標第一母音；無母音 ng→n、m→m。"""
+        母音位 = [i for i, u in enumerate(單位) if u[0] in cls.母音字母]
+        if not 母音位:
+            for i, u in enumerate(單位):
+                if u == 'n':
+                    return i
+            for i, u in enumerate(單位):
+                if u == 'm':
+                    return i
+            return None
+        for i in 母音位:
+            if 單位[i].endswith('\u0358'):
+                return i
+        母音 = ''.join(單位[i][0] for i in 母音位)
+        有韻尾 = any(u[0] in 'hptkmn' for u in 單位[母音位[-1] + 1:])
+        if 母音 in ('iau', 'oai'):
+            return 母音位[1]
+        if len(母音) >= 2:
+            if 母音[0] == 'i':
+                return 母音位[1]
+            if 母音[:2] in ('oa', 'oe'):
+                return 母音位[1] if 有韻尾 else 母音位[0]
+            return 母音位[0]
+        return 母音位[0]
+
     @classmethod
     def 白話字韻標傳統調(cls, 白話字韻無調, 調):
-        該標調的字 = ''
-        if 'o͘' in 白話字韻無調:
-            該標調的字 = 'o͘'
-        elif re.search('(iau)|(oai)', 白話字韻無調):
-            # 三元音 攏標佇a面頂
-            該標調的字 = 'a'
-        elif re.search('[aeiou]{2}', 白話字韻無調):
-            # 雙元音
-            if 白話字韻無調[0] == 'i':
-                該標調的字 = 白話字韻無調[1]
-            elif 白話字韻無調[1] == 'i':
-                該標調的字 = 白話字韻無調[0]
-            elif len(白話字韻無調) == 2:
-                # xx
-                該標調的字 = 白話字韻無調[0]
-            elif 白話字韻無調[-1] == 'ⁿ' and 白話字韻無調[-2:] != 'hⁿ':
-                # xxⁿ
-                該標調的字 = 白話字韻無調[0]
-            else:
-                # xxn, xxng, xxhⁿ
-                該標調的字 = 白話字韻無調[1]
-        elif re.search('[aeiou]', 白話字韻無調):
-            # 單元音
-            該標調的字 = 白話字韻無調[0]
-        elif 'ng' in 白話字韻無調:
-            # ng, mng
-            該標調的字 = 'n'
-        elif 'm' in 白話字韻無調:
-            該標調的字 = 'm'
-        結果 = cls.加上白話字調符(白話字韻無調, 該標調的字, 調)
-        return 結果
+        if 調 in ('1', '4') or not 白話字韻無調:
+            return 白話字韻無調
+        單位 = cls._韻單位(白話字韻無調)
+        位 = cls._取標調位(單位)
+        if 位 is None:
+            return 白話字韻無調
+        單位[位] = cls.加上白話字調符(單位[位], 調)
+        return ''.join(單位)
 
     @classmethod
-    def 加上白話字調符(cls, 白話字韻無調, 標調字母, 調):
-        if 調 == '1' or 調 == '4':
-            return 白話字韻無調
-
-        if (標調字母, 調) not in cls.白話字韻母調符對照表:
-            return 白話字韻無調
-        return 白話字韻無調.replace(標調字母, cls.白話字韻母調符對照表[(標調字母, 調)])
+    def 加上白話字調符(cls, 標調單位, 調):
+        if (標調單位, 調) in cls.白話字韻母調符對照表:
+            return cls.白話字韻母調符對照表[(標調單位, 調)]
+        if 調 in cls.調符組合符:
+            # 表外字母（ṳ、o̤…）：基底後接組合調符，NFC 正規重排
+            return unicodedata.normalize('NFC', 標調單位 + cls.調符組合符[調])
+        return 標調單位
 
 tl2poj_converter = 臺羅轉白話字()
 

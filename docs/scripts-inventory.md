@@ -9,7 +9,8 @@
 | `a-tsioh_sandbox/koktai_dic.py` | Py3 | 解析庫：章首/單字頭（新舊兩式）/讀音列（單/多標籤）/詞條/反切；造字解碼 `to_rt_markup`（含 Fc 內文字元區語意）；raw 逃逸 `escape_pua` |
 | `a-tsioh_sandbox/dic2json.py` | Py3 | stdin→stdout 包裝：`parse_volume` ＋ 統計 stderr |
 | `a-tsioh_sandbox/rt2pronun.py` | Py3 | 三張對照表；`analyze_bopo`（音節切分/調/國語分類）；`tokenize_ruby` 逐字對齊；台羅→白話字 |
-| `a-tsioh_sandbox/build_unified_index.py` | Py3 | 統一索引：讀音聚合＋ytenx join＋平水層＋TSV/JSON 輸出 |
+| `a-tsioh_sandbox/build_unified_index.py` | Py3 | 統一索引：讀音聚合＋ytenx join＋平水層＋ChhoeTaigi 佐證/權重＋TSV/JSON 輸出 |
+| `a-tsioh_sandbox/chhoetaigi.py` | Py3 | ChhoeTaigi CSV 載入庫：KipInput 正規化、漢字↔音節逐位對齊（佐證表）、POJ 黃金對；`--validate-poj`（轉換器黃金測試）、`--attest-stats` |
 
 ## 資料資源
 
@@ -23,7 +24,8 @@
 | `beta01k.dic`–`beta26k.dic` | 原始排版檔（Big5+EUDC；卷 11 源檔截斷僅 2.2KB） |
 | `01.dic.utf8.txt` | 卷 1 的 recode 輸出快照（開發便利品，可由 recode 重生） |
 | `json/01.json`–`26.json` | koktai-dic/2 輸出 |
-| `index/` | 統一聲韻索引輸出 |
+| `index/` | 統一聲韻索引輸出（含 `chhoetaigi_gaps.tsv` 高頻無佐證缺口報告） |
+| `ExternalRef/ChhoeTaigiDatabase/*.csv` | ChhoeTaigi 開放辭典 11 部（甘字典/台日/教典/線頂/iTaigi/Embree/Maryknoll…）；佐證層與 POJ 黃金對來源 |
 
 ## Legacy／周邊（未動，供考古）
 
@@ -51,3 +53,4 @@
 | Python 3（標準庫） | 其餘全部 | 必要；無第三方套件 |
 | `~/dev/ytenx` repo | 中古層 join | 建索引時必要（`--ytenx` 可指路徑）；缺席時可跳過 mc 層（未實作 no-ytenx 模式） |
 | ~~CPAN JSON / File::Slurp~~ | ~~jade-unescape~~ | v2 已移除此依賴 |
+| `ExternalRef/ChhoeTaigiDatabase/` | 索引佐證層＋POJ 黃金測試 | 選用；目錄缺席時 `--chhoetaigi` 自動略過，索引仍可建（無 attest/w 加成） |
