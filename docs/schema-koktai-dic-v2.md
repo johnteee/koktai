@@ -79,9 +79,9 @@
     "lang": "台|國語",
     "sentence": "…",                     // <rt> 已剝
     "sentence_ruby": "…<rt>…</rt>…",     // 保真
-    "pronun_bopo": "ㄅㄚ-ㄏㆲ",           // v1 相容：ruby 扁平串接
-    "pronun_tl":   "pa1-hong1",          // v1 相容（僅台語音節）
-    "pronun_poj":  "pa-hong",
+    "pronun_bopo": "ㄅㄚ-ㄏㆲ",           // v1 相容：ruby 扁平串接；無 ruby 時省略
+    "pronun_tl":   "pa1-hong1",          // v1 相容：entry/sentence item 必有；無 ruby 或不可硬轉時為 ""
+    "pronun_poj":  "pa-hong",            // 與 pronun_tl 成對，由同一 bopo→TL→POJ 轉換器產生
     "tokens": [ Token… ]                 // v2 逐字對齊
   } ],
   "raw": [ 原始行… ]

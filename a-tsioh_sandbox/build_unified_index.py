@@ -47,6 +47,50 @@ def _rows(path, skip_hash=True):
 def strip_ab(miuk):
     return re.sub(r"[AB]$", "", miuk)
 
+# 中古聲母 → 台羅文讀聲母候選。清濁用於陰陽調推導；候選保留常見
+# 文讀分支（如 日母 j/l、明母 b/m），不嘗試白話音或訓讀。
+INITIAL_META = {
+    "幫": ("全清", ["p"]), "滂": ("次清", ["ph"]),
+    "並": ("全濁", ["p", "ph"]), "明": ("次濁", ["b", "m"]),
+    "非": ("全清", ["h"]), "敷": ("次清", ["h"]),
+    "奉": ("全濁", ["h"]), "微": ("次濁", ["b", "m"]),
+    "端": ("全清", ["t"]), "透": ("次清", ["th"]),
+    "定": ("全濁", ["t", "th"]), "泥": ("次濁", ["l", "n"]),
+    "知": ("全清", ["t"]), "徹": ("次清", ["th"]),
+    "澄": ("全濁", ["t", "th"]), "孃": ("次濁", ["l", "n"]),
+    "精": ("全清", ["ts"]), "清": ("次清", ["tsh"]),
+    "從": ("全濁", ["ts", "tsh"]), "心": ("全清", ["s"]),
+    "邪": ("全濁", ["s", "ts"]),
+    "莊": ("全清", ["ts"]), "初": ("次清", ["tsh"]),
+    "崇": ("全濁", ["ts", "s"]), "生": ("全清", ["s"]),
+    "俟": ("全濁", ["s"]),
+    "章": ("全清", ["ts"]), "昌": ("次清", ["tsh"]),
+    "船": ("全濁", ["s", "ts"]), "書": ("全清", ["s"]),
+    "常": ("全濁", ["s", "ts"]),
+    "見": ("全清", ["k"]), "溪": ("次清", ["kh"]),
+    "羣": ("全濁", ["k", "kh"]), "疑": ("次濁", ["g", "ng"]),
+    "曉": ("全清", ["h"]), "匣": ("全濁", ["h"]),
+    "影": ("全清", [""]), "云": ("次濁", [""]),
+    "以": ("次濁", [""]), "來": ("次濁", ["l"]),
+    "日": ("次濁", ["j", "l"]),
+}
+
+# 洪武正韻牋 ytenx 聲母碼 → 切韻系聲母類。一般優先取反切上字；
+# f/bf/mf/pf 只在正韻明示輕脣聲母時覆蓋反切上字。
+ZHENGYUN_INITIAL = {
+    "p": "幫", "ph": "滂", "b": "並", "m": "明",
+    "f": "非", "pf": "非", "bf": "奉", "mf": "微",
+    "t": "端", "th": "透", "d": "定", "n": "泥",
+    "tr": "知", "thr": "徹", "dr": "澄", "nr": "孃",
+    "ts": "精", "tsh": "清", "dz": "從", "s": "心", "z": "邪",
+    "tsr": "莊", "tshr": "初", "dzr": "崇", "sr": "生",
+    "tc": "章", "tch": "昌", "dc": "澄", "c": "書", "zc": "常",
+    "k": "見", "kh": "溪", "g": "羣", "ng": "疑",
+    "h": "曉", "gh": "匣", "q": "影", "y": "以", "j": "日",
+    "l": "來", "ny": "日",
+}
+LIGHT_LABIAL_ZY = {"f", "pf", "bf", "mf"}
+
 
 class Ytenx:
     """kyonh（廣韻）＋ tcenghyonhtsen（洪武正韻）小韻表。"""
@@ -137,6 +181,19 @@ class Ytenx:
             return None
         return [self.ky_xy[z] for z in ids[:cap]]
 
+    def char_initial(self, ch):
+        ids = self.ky_dzih.get(ch)
+        if not ids:
+            return None
+        counts = defaultdict(int)
+        for z in ids:
+            rec = self.ky_xy.get(z)
+            if rec and rec.get("initial"):
+                counts[rec["initial"]] += 1
+        if not counts:
+            return None
+        return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+
 
 # ---------------------------------------------------------------- 平水層
 class Pingshui:
@@ -170,6 +227,95 @@ class Pingshui:
         expected = tl.get("tl_ru" if tone == "入" else "tl", [])
         return {"bu": bu, "series": series, "tone": tone,
                 "expected_tl": expected}
+
+
+# ---------------------------------------------------------------- 反切 → 台羅文讀模擬
+def unique(seq):
+    out, seen = [], set()
+    for x in seq:
+        if x not in seen:
+            seen.add(x)
+            out.append(x)
+    return out
+
+
+def taigi_literary_tone(mc_tone, voicing):
+    yin = voicing in ("全清", "次清")
+    if mc_tone == "平":
+        return 1 if yin else 5
+    if mc_tone == "上":
+        return 7 if voicing == "全濁" else 2
+    if mc_tone == "去":
+        return 3 if yin else 7
+    if mc_tone == "入":
+        return 4 if yin else 8
+    return None
+
+
+def initial_category(entry, ytenx):
+    join = entry.get("join") or {}
+    rec = (join.get("candidates") or [join])[0]
+    initial = rec.get("initial")
+    method = join.get("method", "")
+
+    if method.startswith("正韻") and initial in LIGHT_LABIAL_ZY:
+        return ZHENGYUN_INITIAL.get(initial), "正韻輕脣聲母"
+
+    speller = (entry.get("fanqie") or "").removesuffix("切")
+    if speller:
+        cat = ytenx.char_initial(speller[0])
+        if cat:
+            return cat, "反切上字"
+
+    if initial in INITIAL_META:
+        return initial, "小韻聲母"
+    if initial in ZHENGYUN_INITIAL:
+        return ZHENGYUN_INITIAL[initial], "正韻聲母"
+    return None, None
+
+
+def sim_confidence(method):
+    if method in ("廣韻反切", "正韻反切"):
+        return "high"
+    if method in ("廣韻反切·平水寬", "正韻反切·寬"):
+        return "medium"
+    return "low"
+
+
+def derive_sim_tl(entry, ytenx):
+    """反切/中古地位 → 台羅文讀候選；不預測白話音。"""
+    psrec = entry.get("pingshui") or {}
+    finals = psrec.get("expected_tl") or []
+    if not finals:
+        return None
+
+    join = entry.get("join") or {}
+    rec = (join.get("candidates") or [join])[0]
+    mc_tone = rec.get("mc_tone") or psrec.get("tone")
+    if not mc_tone:
+        return None
+
+    cat, source = initial_category(entry, ytenx)
+    meta = INITIAL_META.get(cat)
+    if not meta:
+        return None
+    voicing, initials = meta
+    tone = taigi_literary_tone(mc_tone, voicing)
+    if tone is None:
+        return None
+
+    syllables = unique(
+        f"{initial}{final}{tone}" for initial in initials for final in finals)
+    return {
+        "syllables": syllables,
+        "initials": initials,
+        "finals": finals,
+        "tone": tone,
+        "initial_category": cat,
+        "voicing": voicing,
+        "source": source,
+        "confidence": sim_confidence(join.get("method")),
+    }
 
 
 # ---------------------------------------------------------------- 語域
@@ -276,6 +422,10 @@ def collect_volume(vol_id, data, coll, ytenx, ps):
                 psrec = ps.lookup(cite["yun"])
                 if psrec:
                     entry["pingshui"] = psrec
+                sim = derive_sim_tl(entry, ytenx)
+                if sim:
+                    entry["sim_tl"] = sim
+                    coll.stats["sim_tl"] += 1
                 key = (entry["fanqie"], entry["yun"])
                 if anchor and key not in mc_seen:
                     mc_seen.add(key)
@@ -295,6 +445,10 @@ def collect_volume(vol_id, data, coll, ytenx, ps):
                                (ps.lookup(c["miuk"]) for c in cands) if b]
                     if lookups and len({b["bu"] for b in lookups}) == 1:
                         fb["pingshui"] = lookups[0]
+                    sim = derive_sim_tl(fb, ytenx)
+                    if sim:
+                        fb["sim_tl"] = sim
+                        coll.stats["sim_tl"] += 1
                     coll.mc[anchor].append(fb)
 
             # 詞條 tokens

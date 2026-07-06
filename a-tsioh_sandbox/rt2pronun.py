@@ -426,6 +426,9 @@ def annotate_text_field(data, key):
     """v1 相容欄位（pronun_*）＋ v2 保真欄位（*_ruby, tokens）。"""
     original = data[key]
     pronunciations = re.findall(r"<rt>(.*?)</rt>", original)
+    # 所有 entry/sentence item 都保有成對 v1 欄位；無 ruby 時留空，避免下游缺鍵。
+    data["pronun_tl"] = ""
+    data["pronun_poj"] = ""
     if not pronunciations:
         return
     data[key + "_ruby"] = original                     # 保真：對齊原文
@@ -433,9 +436,9 @@ def annotate_text_field(data, key):
     analyses = [analyze_bopo(p) for p in pronunciations]
     tl_flat = [a.get("tl", "") for a in analyses]
     poj_flat = [a.get("poj", "") for a in analyses]
-    if any(tl_flat):
-        data["pronun_tl"] = "-".join(tl_flat)
-        data["pronun_poj"] = "-".join(poj_flat)
+    # v1 相容欄位必須成對存在：國音/未知注音不可硬轉台羅，留空字串保真。
+    data["pronun_tl"] = "-".join(tl_flat)
+    data["pronun_poj"] = "-".join(poj_flat)
     data["tokens"] = enrich_tokens(tokenize_ruby(original))
     data[key] = re.sub(r"<rt>.*?</rt>", "", original)
 
