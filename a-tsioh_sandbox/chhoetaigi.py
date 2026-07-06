@@ -50,6 +50,7 @@ DICTS = [
 
 DICT_WEIGHT = {tag: (len(DICTS) - i) * 2 for i, (tag, *_rest) in enumerate(DICTS)}
 DICT_WEIGHT["甘文"] = DICT_WEIGHT["甘"]
+# 教育部附錄標籤（比/新/共/諺）由 sutian.py 註冊，權重同「教」。
 
 # 台羅調符（NFD 組合符）→ 數字調；KIP Unicode（700用字音讀欄）轉數字用。
 _TONE_MARKS = {"\u0301": "2", "\u0300": "3", "\u0302": "5", "\u030c": "6",

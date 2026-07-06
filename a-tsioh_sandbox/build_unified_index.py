@@ -28,6 +28,7 @@ from collections import defaultdict
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from chhoetaigi import DICT_WEIGHT, load_attestation, DEFAULT_DIR as CT_DIR
+from sutian import load_sutsha, load_appendices, DEFAULT_ODS as SUTIAN_ODS
 HAN_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002FFFF]")
 
 
@@ -308,7 +309,7 @@ def collect_volume(vol_id, data, coll, ytenx, ps):
 
 
 # ---------------------------------------------------------------- 輸出
-def build_outputs(coll, out_dir, meta, attest=None):
+def build_outputs(coll, out_dir, meta, attest=None, dialects=None):
     han = defaultdict(lambda: {"mandarin": [], "taigi": [], "mc": []})
     tl_index = defaultdict(list)
 
@@ -331,6 +332,10 @@ def build_outputs(coll, out_dir, meta, attest=None):
         }
         if tags:
             rec["attest"] = tags
+        if dialects:
+            dia = sorted(dialects.get((ch, tl), ()))
+            if dia:
+                rec["dialects"] = dia
         han[ch]["taigi"].append(rec)
     for ch, zy in coll.mandarin.items():
         han[ch]["mandarin"] = sorted(zy)
@@ -382,13 +387,14 @@ def build_outputs(coll, out_dir, meta, attest=None):
 
     with open(os.path.join(out_dir, "han_to_tl.tsv"), "w",
               encoding="utf-8") as f:
-        f.write("#漢字\t台羅\t方音\t白話字\t語域\t次數\t權重\t佐證\t例源\n")
+        f.write("#漢字\t台羅\t方音\t白話字\t語域\t次數\t權重\t佐證\t腔別\t例源\n")
         for ch in sorted(han):
             for r in han[ch]["taigi"]:
                 f.write("\t".join([
                     ch, r["tl"], "/".join(r["bopo"]), "/".join(r["poj"]),
                     "/".join(r["registers"]), str(r["n"]), str(r["w"]),
                     ",".join(r.get("attest", [])),
+                    ",".join(r.get("dialects", [])),
                     ";".join(r["sources"][:3])]) + "\n")
 
     with open(os.path.join(out_dir, "tl_to_han.tsv"), "w",
@@ -426,6 +432,11 @@ def main():
     ap.add_argument("--out", default="index")
     ap.add_argument("--chhoetaigi", default=CT_DIR,
                     help="ChhoeTaigi CSV 目錄；不存在時自動略過佐證層")
+    ap.add_argument("--sutian", default=SUTIAN_ODS,
+                    help="教育部詞彙比較表 .ods；不存在時自動略過方言腔層")
+    ap.add_argument("--moe-dir", default=None,
+                    help="教育部附錄（新詞/共同詞/俗諺 *.ods）目錄；"
+                         "預設同 --sutian 所在目錄")
     args = ap.parse_args()
 
     ytenx = Ytenx(args.ytenx)
@@ -437,6 +448,29 @@ def main():
         attest, att_stats = load_attestation(args.chhoetaigi)
         print(f"[index] ChhoeTaigi 佐證表：{att_stats['pairs']} (漢字,台羅) 對",
               file=sys.stderr)
+
+    dialects = None
+    if os.path.isfile(args.sutian):
+        su_att, dialects, su_stats = load_sutsha(args.sutian)
+        print(f"[index] 教育部詞彙比較：{su_stats['aligned']}/{su_stats['rows']} 列"
+              f"對齊，{su_stats['pairs']} (漢字,台羅) 對", file=sys.stderr)
+        if attest is None:
+            attest = {}
+        for k, v in su_att.items():
+            attest.setdefault(k, set()).update(v)
+
+    moe_dir = args.moe_dir or os.path.dirname(os.path.abspath(args.sutian))
+    app_att, app_stats = load_appendices(moe_dir) \
+        if os.path.isdir(moe_dir) else ({}, {})
+    if app_att:
+        if attest is None:
+            attest = {}
+        for k, v in app_att.items():
+            attest.setdefault(k, set()).update(v)
+        for tag, st in app_stats.items():
+            print(f"[index] 教育部附錄 {tag}（{st['label']}）："
+                  f"{st['aligned']}/{st['rows']} 列，{st['pairs']} 對"
+                  f"（{st['file']}）", file=sys.stderr)
 
     files = sorted(glob.glob(args.json))
     vols = []
@@ -465,10 +499,16 @@ def main():
             "chhoetaigi": None if attest is None else
                 "ExternalRef/ChhoeTaigiDatabase/（ChhoeTaigi 開放辭典 CSV；"
                 "佐證標籤=辭典，權重法仿 ch2taigi）",
+            "sutian_sutsha": None if dialects is None else
+                "ExternalRef/詞彙比較表.ods（教育部台語辭典附錄「詞彙比較」；"
+                "十腔別；佐證標籤=比）",
+            "sutian_appendices": None if not app_att else {
+                tag: f"{st['label']}（{st['file']}）"
+                for tag, st in app_stats.items()},
         },
         "stats": dict(coll.stats),
     }
-    uni = build_outputs(coll, args.out, meta, attest=attest)
+    uni = build_outputs(coll, args.out, meta, attest=attest, dialects=dialects)
 
     n_han = len(uni["han"])
     n_tl = len(uni["tl"])

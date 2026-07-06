@@ -11,6 +11,7 @@
 | `a-tsioh_sandbox/rt2pronun.py` | Py3 | 三張對照表；`analyze_bopo`（音節切分/調/國語分類）；`tokenize_ruby` 逐字對齊；台羅→白話字 |
 | `a-tsioh_sandbox/build_unified_index.py` | Py3 | 統一索引：讀音聚合＋ytenx join＋平水層＋ChhoeTaigi 佐證/權重＋TSV/JSON 輸出 |
 | `a-tsioh_sandbox/chhoetaigi.py` | Py3 | ChhoeTaigi CSV 載入庫：KipInput 正規化、漢字↔音節逐位對齊（佐證表）、POJ 黃金對；`--validate-poj`（轉換器黃金測試）、`--attest-stats` |
+| `a-tsioh_sandbox/sutian.py` | Py3 | 教育部辭典附錄載入庫：詞彙比較（十腔別、佐證 `比`、陽上 6→7 摺疊）＋新詞/共同詞/俗諺（佐證 `新`/`共`/`諺`、「/」變體、俗諺句級對齊） |
 
 ## 資料資源
 
@@ -26,6 +27,8 @@
 | `json/01.json`–`26.json` | koktai-dic/2 輸出 |
 | `index/` | 統一聲韻索引輸出（含 `chhoetaigi_gaps.tsv` 高頻無佐證缺口報告） |
 | `ExternalRef/ChhoeTaigiDatabase/*.csv` | ChhoeTaigi 開放辭典 11 部（甘字典/台日/教典/線頂/iTaigi/Embree/Maryknoll…）；佐證層與 POJ 黃金對來源 |
+| `ExternalRef/詞彙比較表.ods` | 教育部台語辭典附錄「詞彙比較」（sutian.moe.edu.tw）；十腔別方言層來源 |
+| `ExternalRef/sinsu120_*.ods`、`kiongtongsu350_*.ods`、`siokgan40_*.ods` | 教育部附錄：新詞 120／臺華共同詞 350／俗諺 40（佐證 `新`/`共`/`諺`；glob 取最新版本） |
 
 ## Legacy／周邊（未動，供考古）
 
@@ -54,3 +57,5 @@
 | `~/dev/ytenx` repo | 中古層 join | 建索引時必要（`--ytenx` 可指路徑）；缺席時可跳過 mc 層（未實作 no-ytenx 模式） |
 | ~~CPAN JSON / File::Slurp~~ | ~~jade-unescape~~ | v2 已移除此依賴 |
 | `ExternalRef/ChhoeTaigiDatabase/` | 索引佐證層＋POJ 黃金測試 | 選用；目錄缺席時 `--chhoetaigi` 自動略過，索引仍可建（無 attest/w 加成） |
+| `ExternalRef/詞彙比較表.ods` | 索引方言腔層 | 選用；檔案缺席時 `--sutian` 自動略過（無 dialects 欄） |
+| `ExternalRef/{sinsu,kiongtongsu,siokgan}*.ods` | 索引佐證標籤 新/共/諺 | 選用；缺席自動略過（`--moe-dir` 可另指目錄） |

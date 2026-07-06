@@ -23,8 +23,8 @@
 # 1. 全 26 卷 .dic → koktai-dic/2 JSON（約 40 秒）
 perl gen_json.pl                     # 產出 json/01.json … json/26.json
 
-# 2. 統一聲韻索引（約 10 秒；需本機有 ytenx repo；
-#    ExternalRef/ChhoeTaigiDatabase 存在時自動加佐證層）
+# 2. 統一聲韻索引（約 10 秒；需本機有 ytenx repo；ExternalRef 的
+#    ChhoeTaigiDatabase/（佐證層）與 詞彙比較表.ods（腔別層）存在時自動載入）
 python3 a-tsioh_sandbox/build_unified_index.py \
     --json 'json/*.json' --ytenx ~/dev/ytenx --out index
 # 產出 index/unified_phonology.json、han_to_tl.tsv、tl_to_han.tsv、
@@ -46,7 +46,8 @@ python3 a-tsioh_sandbox/chhoetaigi.py --validate-poj
 | 索引漢字 | 10,026 |
 | 索引台羅音節 | 3,272 |
 | （漢字, 台羅）讀音對 | 28,758（聚合自 627,497 個對齊 token） |
-| ChhoeTaigi 佐證 | 15,190 對（52.8%）；token 質量覆蓋 88.5% |
+| ChhoeTaigi＋詞彙比較 佐證 | 15,234 對（53.0%）；token 質量覆蓋 88.5% |
+| 方言腔別層（教育部詞彙比較） | 1,937 讀音對帶十腔別（鹿泉…高混） |
 
 ## 主要程式
 
@@ -58,6 +59,7 @@ python3 a-tsioh_sandbox/chhoetaigi.py --validate-poj
 | `a-tsioh_sandbox/rt2pronun.py` | 方音符號→台羅/白話字；逐字對齊 tokens；語言分類 |
 | `a-tsioh_sandbox/build_unified_index.py` | 統一聲韻索引產生器（ytenx 中古層 join＋ChhoeTaigi 佐證/權重） |
 | `a-tsioh_sandbox/chhoetaigi.py` | ChhoeTaigi CSV 載入庫＋佐證對齊＋POJ 黃金測試 |
+| `a-tsioh_sandbox/sutian.py` | 教育部辭典附錄載入庫（詞彙比較十腔別＋新詞/共同詞/俗諺佐證） |
 | `gen_json.pl` | 全卷批次驅動 |
 | `font/m3.json`, `font/k.json` | 造字 hex → 方音符號串（明體／楷體） |
 | `a-tsioh_sandbox/mapping.json` | 造字字元 → 罕用漢字 |
