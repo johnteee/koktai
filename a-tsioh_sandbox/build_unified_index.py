@@ -106,12 +106,17 @@ class Ytenx:
         鄰韻，如 歌↔戈、職↔德、卦↔夬）→ 正韻反切唯一（正韻自有 22 目，
         引文韻目常仍作切韻系名）。方法名如實標注，供下游過濾。
         """
+        def same_yun(a, b):
+            if ps is None:
+                return a == b
+            return ps.normalize_yun(a) == ps.normalize_yun(b)
+
         for ziox in self.ky_fq.get(speller, ()):
             rec = self.ky_xy[ziox]
-            if rec["miuk"] == yun:
+            if same_yun(rec["miuk"], yun):
                 return "廣韻反切", rec
         for rec in self.zy_fq.get(speller, ()):
-            if rec["miuk"] == yun:
+            if same_yun(rec["miuk"], yun):
                 return "正韻反切", rec
         if ps is not None:
             want = ps.lookup(yun)

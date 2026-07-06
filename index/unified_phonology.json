@@ -44,8 +44,8 @@
   },
   "stats": {
    "taigi_pairs": 627497,
-   "join_正韻反切·寬": 1530,
-   "join_正韻反切": 1800,
+   "join_正韻反切·寬": 1446,
+   "join_正韻反切": 1884,
    "join_char_fallback": 3414,
    "join_廣韻反切·平水寬": 233,
    "join_廣韻反切": 2778,
@@ -26723,7 +26723,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 180,
       "taj": "人",
       "miuk": "真",
@@ -26943,7 +26943,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 180,
       "taj": "人",
       "miuk": "真",
@@ -33361,7 +33361,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -44884,7 +44884,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -60060,7 +60060,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -62215,7 +62215,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 180,
       "taj": "人",
       "miuk": "真",
@@ -70430,7 +70430,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1181,
       "taj": "廩",
       "miuk": "寢",
@@ -113716,7 +113716,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -140197,7 +140197,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 178,
       "taj": "瞋",
       "miuk": "真",
@@ -156314,7 +156314,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -157255,7 +157255,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 199,
       "taj": "囷",
       "miuk": "真",
@@ -165937,7 +165937,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 198,
       "taj": "銀",
       "miuk": "真",
@@ -171108,7 +171108,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -194137,7 +194137,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -195778,7 +195778,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -202805,7 +202805,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 187,
       "taj": "頻",
       "miuk": "真",
@@ -203370,7 +203370,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1170,
       "taj": "審",
       "miuk": "寢",
@@ -210984,7 +210984,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 179,
       "taj": "辰",
       "miuk": "真",
@@ -213832,7 +213832,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1170,
       "taj": "審",
       "miuk": "寢",
@@ -247158,7 +247158,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1181,
       "taj": "廩",
       "miuk": "寢",
@@ -284439,7 +284439,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1181,
       "taj": "廩",
       "miuk": "寢",
@@ -309450,7 +309450,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 176,
       "taj": "真",
       "miuk": "真",
@@ -316074,7 +316074,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 210,
       "taj": "倫",
       "miuk": "真",
@@ -367280,7 +367280,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 179,
       "taj": "辰",
       "miuk": "真",
@@ -414508,7 +414508,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1181,
       "taj": "廩",
       "miuk": "寢",
@@ -416121,7 +416121,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -431954,7 +431954,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -437753,7 +437753,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1170,
       "taj": "審",
       "miuk": "寢",
@@ -445969,7 +445969,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -447669,7 +447669,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 183,
       "taj": "津",
       "miuk": "真",
@@ -456431,7 +456431,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 210,
       "taj": "倫",
       "miuk": "真",
@@ -462613,7 +462613,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -480834,7 +480834,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -481650,7 +481650,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1170,
       "taj": "審",
       "miuk": "寢",
@@ -482093,7 +482093,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -498053,7 +498053,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 231,
       "taj": "莘",
       "miuk": "真",
@@ -511245,7 +511245,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 198,
       "taj": "銀",
       "miuk": "真",
@@ -518380,7 +518380,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -528379,7 +528379,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 176,
       "taj": "真",
       "miuk": "真",
@@ -530180,7 +530180,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 231,
       "taj": "莘",
       "miuk": "真",
@@ -531568,7 +531568,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -545119,7 +545119,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1175,
       "taj": "㾕",
       "miuk": "寢",
@@ -558085,7 +558085,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 176,
       "taj": "真",
       "miuk": "真",
@@ -563367,7 +563367,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 178,
       "taj": "瞋",
       "miuk": "真",
@@ -566767,7 +566767,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 197,
       "taj": "勤",
       "miuk": "真",
@@ -578311,7 +578311,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1176,
       "taj": "墋",
       "miuk": "寢",
@@ -584688,7 +584688,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -585319,7 +585319,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 176,
       "taj": "真",
       "miuk": "真",
@@ -588258,7 +588258,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 184,
       "taj": "秦",
       "miuk": "真",
@@ -590075,7 +590075,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1174,
       "taj": "餁",
       "miuk": "寢",
@@ -590836,7 +590836,7 @@
      "yun": "寢",
      "source": "唐韻",
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1181,
       "taj": "廩",
       "miuk": "寢",
@@ -624339,7 +624339,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 180,
       "taj": "人",
       "miuk": "真",
@@ -625044,7 +625044,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 205,
       "taj": "純",
       "miuk": "真",
@@ -627619,7 +627619,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -630514,7 +630514,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -645014,7 +645014,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -680679,7 +680679,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 179,
       "taj": "辰",
       "miuk": "真",
@@ -698898,7 +698898,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -700485,7 +700485,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1174,
       "taj": "餁",
       "miuk": "寢",
@@ -730499,7 +730499,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 187,
       "taj": "頻",
       "miuk": "真",
@@ -741779,7 +741779,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 210,
       "taj": "倫",
       "miuk": "真",
@@ -746198,7 +746198,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 184,
       "taj": "秦",
       "miuk": "真",
@@ -751821,7 +751821,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -759675,7 +759675,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -784555,7 +784555,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 198,
       "taj": "銀",
       "miuk": "真",
@@ -786206,7 +786206,7 @@
      "yun": "寢",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 1170,
       "taj": "審",
       "miuk": "寢",
@@ -804418,7 +804418,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -806909,7 +806909,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 192,
       "taj": "氳",
       "miuk": "真",
@@ -825921,7 +825921,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 177,
       "taj": "申",
       "miuk": "真",
@@ -835227,7 +835227,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 179,
       "taj": "辰",
       "miuk": "真",
@@ -854707,7 +854707,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 198,
       "taj": "銀",
       "miuk": "真",
@@ -870930,7 +870930,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 198,
       "taj": "銀",
       "miuk": "真",
@@ -887705,7 +887705,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 186,
       "taj": "賓",
       "miuk": "真",
@@ -895094,7 +895094,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
@@ -923979,7 +923979,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 187,
       "taj": "頻",
       "miuk": "真",
@@ -926226,7 +926226,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 187,
       "taj": "頻",
       "miuk": "真",
@@ -938600,7 +938600,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 231,
       "taj": "莘",
       "miuk": "真",
@@ -938826,7 +938826,7 @@
      "yun": "真",
      "source": null,
      "join": {
-      "method": "正韻反切·寬",
+      "method": "正韻反切",
       "xiaoyun": 191,
       "taj": "因",
       "miuk": "真",
