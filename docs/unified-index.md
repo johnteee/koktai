@@ -2,14 +2,17 @@
 
 產生器：`a-tsioh_sandbox/build_unified_index.py`
 輸入：`json/*.json`（koktai-dic/2）＋ ytenx 查表 ＋ `data/*.json` 兩張聲韻表
-＋ ChhoeTaigi CSV（佐證層，選用）
+＋ ChhoeTaigi CSV（佐證層，選用）＋ 教育部詞彙比較/附錄 ods ＋ 千金譜 md
 輸出：`index/unified_phonology.json`、`index/han_to_tl.tsv`、`index/tl_to_han.tsv`、
 `index/chhoetaigi_gaps.tsv`
 
 ```sh
 python3 a-tsioh_sandbox/build_unified_index.py \
     [--json 'json/*.json'] [--ytenx ~/dev/ytenx] [--out index] \
-    [--chhoetaigi ExternalRef/ChhoeTaigiDatabase]   # 目錄不存在則自動略過
+    [--chhoetaigi ExternalRef/ChhoeTaigiDatabase] \
+    [--sutian ExternalRef/詞彙比較表.ods] \
+    [--chhiankimpho ExternalRef/chhian-kim-pho2.md]
+# 各外部源檔不存在時自動略過
 ```
 
 ## 資料匯流
@@ -26,6 +29,7 @@ python3 a-tsioh_sandbox/build_unified_index.py \
 | ChhoeTaigi CSV × `chhoetaigi.py` | (漢字, 台羅) 佐證標籤＋權重（見下） |
 | 詞彙比較表.ods × `sutian.py` | 佐證標籤 `比` ＋ 十腔別 `dialects`（見下） |
 | 附錄 新詞/共同詞/俗諺 ×3 ods × `sutian.load_appendices` | 佐證標籤 `新`/`共`/`諺` |
+| 千金譜 × `chhiankimpho.py` | 佐證標籤 `金`（POJ→台羅轉換；歷史文獻，權重 2） |
 
 聚合鍵 `(漢字, 台羅音節)`；多音節台羅（詞讀）不入字級索引。每對記
 `bopo / poj / registers / n（次數）/ w（權重）/ attest（佐證）/
@@ -47,7 +51,8 @@ dialects（腔別）/ sources（≤5 例源，格式「卷:字頭」或「卷:�
 標籤字彙：`700`=教育部700用字、`教`=教育部台語辭典、`線`=台華線頂對照典、
 `iT`=iTaigi、`基`=白話基礎語句集、`日`=台日大辭典、`甘`/`甘文`=甘字典（白/漢文音）、
 `植`=台灣植物名彙、`Em`=Embree、`Mk`=Maryknoll；教育部附錄（權重同教典）：
-`比`=詞彙比較、`新`=新詞120、`共`=臺華共同詞350、`諺`=俗諺40。
+`比`=詞彙比較、`新`=新詞120、`共`=臺華共同詞350、`諺`=俗諺40；
+`金`=千金譜（歷史文獻，權重 2）。
 
 ## 教育部詞彙比較：方言腔層（`sutian.py`）
 

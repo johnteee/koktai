@@ -29,6 +29,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 from chhoetaigi import DICT_WEIGHT, load_attestation, DEFAULT_DIR as CT_DIR
 from sutian import load_sutsha, load_appendices, DEFAULT_ODS as SUTIAN_ODS
+from chhiankimpho import load_attestation as load_chhiankimpho, DEFAULT_MD as CKP_MD
 HAN_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002FFFF]")
 
 
@@ -596,6 +597,8 @@ def main():
     ap.add_argument("--moe-dir", default=None,
                     help="教育部附錄（新詞/共同詞/俗諺 *.ods）目錄；"
                          "預設同 --sutian 所在目錄")
+    ap.add_argument("--chhiankimpho", default=CKP_MD,
+                    help="千金譜 Markdown 檔路徑；不存在時自動略過")
     args = ap.parse_args()
 
     ytenx = Ytenx(args.ytenx)
@@ -631,6 +634,15 @@ def main():
                   f"{st['aligned']}/{st['rows']} 列，{st['pairs']} 對"
                   f"（{st['file']}）", file=sys.stderr)
 
+    if os.path.isfile(args.chhiankimpho):
+        ckp_att, ckp_stats = load_chhiankimpho(args.chhiankimpho)
+        print(f"[index] 千金譜：{ckp_stats['aligned']}/{ckp_stats['lines']} 行"
+              f"對齊，{ckp_stats['pairs']} (漢字,台羅) 對", file=sys.stderr)
+        if attest is None:
+            attest = {}
+        for k, v in ckp_att.items():
+            attest.setdefault(k, set()).update(v)
+
     files = sorted(glob.glob(args.json))
     vols = []
     for path in files:
@@ -664,6 +676,9 @@ def main():
             "sutian_appendices": None if not app_att else {
                 tag: f"{st['label']}（{st['file']}）"
                 for tag, st in app_stats.items()},
+            "chhiankimpho": None if not os.path.isfile(args.chhiankimpho) else
+                "ExternalRef/chhian-kim-pho2.md（《千金譜》limkianhui 校訂版；"
+                "POJ→台羅轉換；佐證標籤=金，權重=2）",
         },
         "stats": dict(coll.stats),
     }
