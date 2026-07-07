@@ -6,6 +6,7 @@
   * ytenx 聲韻查表（--ytenx 指向 repo 根；用 kyonh=廣韻、tcenghyonhtsen=洪武正韻）
   * data/kuangx_pingshui.json（切韻系韻目 ↔ 平水部）
   * data/pingshui_tl.json（平水韻系 → 台羅文讀韻母；出處：ExternalRef 平水韻編碼 PDF）
+  * data/literature_extra_chars.txt（可選；文學語料額外字頭 → ytenx 字頭歸小韻）
 
 輸出（--out，預設 index/）：
   * unified_phonology.json  全量索引：han → {mandarin, taigi, mc, pingshui}、tl → [han…]
@@ -14,7 +15,7 @@
 
 用法：
   python3 a-tsioh_sandbox/build_unified_index.py \
-      [--json 'json/*.json'] [--ytenx ~/dev/ytenx] [--out index]
+      [--json 'json/*.json'] [--ytenx ~/dev/ytenx] [--out index] [--extra-chars PATH]
 """
 
 import argparse
@@ -30,6 +31,7 @@ sys.path.insert(0, HERE)
 from chhoetaigi import DICT_WEIGHT, load_attestation, DEFAULT_DIR as CT_DIR
 from sutian import load_sutsha, load_appendices, DEFAULT_ODS as SUTIAN_ODS
 from chhiankimpho import load_attestation as load_chhiankimpho, DEFAULT_MD as CKP_MD
+DEFAULT_EXTRA_CHARS = os.path.join(HERE, "data", "literature_extra_chars.txt")
 HAN_RE = re.compile(r"[\u3400-\u9fff\U00020000-\U0002FFFF]")
 
 
@@ -378,6 +380,48 @@ def head_chars(head):
             out.append(ch)
     return out
 
+def load_extra_chars(path):
+    """額外字頭表：讀入需要 ytenx 字頭歸小韻補足的漢字。"""
+    if not path or not os.path.isfile(path):
+        return []
+    chars, seen = [], set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.split("#", 1)[0]
+            for m in HAN_RE.finditer(line):
+                ch = m.group(0)
+                if ch not in seen:
+                    seen.add(ch)
+                    chars.append(ch)
+    return chars
+
+
+def add_ytenx_char_fallback(coll, ytenx, ps, ch):
+    """For explicit extra chars, add an MC-only ytenx fallback if it yields TL."""
+    if any((e.get("sim_tl") or {}).get("syllables")
+           for e in coll.mc.get(ch, [])):
+        coll.stats["extra_char_has_sim_tl"] += 1
+        return False
+    cands = ytenx.join_char(ch)
+    if not cands:
+        coll.stats["extra_char_no_ytenx"] += 1
+        return False
+    fb = {"join": {"method": "字頭歸小韻·外字",
+                   "candidates": [
+                       {k: v for k, v in c.items() if k != "fanqie"}
+                       for c in cands]}}
+    lookups = [b for b in (ps.lookup(c["miuk"]) for c in cands) if b]
+    if lookups and len({b["bu"] for b in lookups}) == 1:
+        fb["pingshui"] = lookups[0]
+    sim = derive_sim_tl(fb, ytenx)
+    if not sim:
+        coll.stats["extra_char_no_sim_tl"] += 1
+        return False
+    fb["sim_tl"] = sim
+    coll.mc[ch].append(fb)
+    coll.stats["extra_char_fallback"] += 1
+    coll.stats["sim_tl"] += 1
+    return True
 
 def collect_volume(vol_id, data, coll, ytenx, ps):
     for chap in data.get("chapters", []):
@@ -599,6 +643,8 @@ def main():
                          "預設同 --sutian 所在目錄")
     ap.add_argument("--chhiankimpho", default=CKP_MD,
                     help="千金譜 Markdown 檔路徑；不存在時自動略過")
+    ap.add_argument("--extra-chars", default=DEFAULT_EXTRA_CHARS,
+                    help="額外漢字清單；存在時以 ytenx 字頭歸小韻補 MC-only 文讀候選")
     args = ap.parse_args()
 
     ytenx = Ytenx(args.ytenx)
@@ -659,6 +705,13 @@ def main():
         vols.append(vol_id)
         collect_volume(vol_id, data, coll, ytenx, ps)
 
+    extra_chars = load_extra_chars(args.extra_chars)
+    if extra_chars:
+        added = sum(1 for ch in extra_chars
+                    if add_ytenx_char_fallback(coll, ytenx, ps, ch))
+        print(f"[index] 額外字頭：{added}/{len(extra_chars)} 字加入 ytenx fallback",
+              file=sys.stderr)
+
     meta = {
         "generator": "a-tsioh_sandbox/build_unified_index.py",
         "volumes": vols,
@@ -679,6 +732,9 @@ def main():
             "chhiankimpho": None if not os.path.isfile(args.chhiankimpho) else
                 "ExternalRef/chhian-kim-pho2.md（《千金譜》limkianhui 校訂版；"
                 "POJ→台羅轉換；佐證標籤=金，權重=2）",
+            "extra_chars": None if not os.path.isfile(args.extra_chars) else
+                f"{os.path.relpath(args.extra_chars)}（文學語料額外字頭；"
+                "ytenx 字頭歸小韻；MC-only 文讀候選）",
         },
         "stats": dict(coll.stats),
     }

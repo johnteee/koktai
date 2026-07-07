@@ -4,12 +4,20 @@
 
 import os
 import sys
+import tempfile
 import unittest
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 
-from build_unified_index import Pingshui, Ytenx, derive_sim_tl  # noqa: E402
+from build_unified_index import (  # noqa: E402
+    Collector,
+    Pingshui,
+    Ytenx,
+    add_ytenx_char_fallback,
+    derive_sim_tl,
+    load_extra_chars,
+)
 
 YTENX_ROOT = os.path.expanduser("~/dev/ytenx")
 
@@ -95,6 +103,27 @@ class JoinFanqieRegression(unittest.TestCase):
         self.assertNotIn("tiong1", sim_zy["syllables"])
         self.assertEqual(sim_zy["initial_category"], "章")
         self.assertEqual(sim_zy["source"], "正韻聲母")
+
+    def test_add_ytenx_char_fallback_xiao(self):
+        """嘯：字頭歸小韻·外字 → 嘯部、siau3。"""
+        coll = Collector()
+        self.assertTrue(add_ytenx_char_fallback(coll, self.ytenx, self.ps, "嘯"))
+        rec = coll.mc["嘯"][0]
+        self.assertEqual(rec["join"]["method"], "字頭歸小韻·外字")
+        self.assertEqual(rec["pingshui"]["bu"], "嘯")
+        self.assertIn("siau3", rec["sim_tl"]["syllables"])
+
+    def test_load_extra_chars_comments_and_dedup(self):
+        with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", delete=False, suffix=".txt") as f:
+            f.write("# comment with 嘯\n")
+            f.write("嘯 蕭\n")
+            f.write("嘯\n")
+            path = f.name
+        try:
+            self.assertEqual(load_extra_chars(path), ["嘯", "蕭"])
+        finally:
+            os.unlink(path)
 
 
 if __name__ == "__main__":

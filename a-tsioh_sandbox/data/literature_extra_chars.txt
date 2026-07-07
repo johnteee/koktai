@@ -1,0 +1,5 @@
+# Extra Han characters used by ch2taigi literature that lack usable koktai 台語
+# or simulated 反切 pronunciations in the current shipped phonology index.
+# Generated from /Users/teee/dev/ch2taigi/literature/**/*.md by the same
+# semantics as literature/taigi_phonetics.py::pick(): no sim_tl syllable and no taigi fallback.
+䢋个亶伾佸侐俁傚傞僊僩冔劚卍卣厎啓嗸嗿嘅嘌嘯噂噳嚖嚬嚲囒坰奰媿寁尰峴崒嶞帊幙幝幩幭庤弨忉忺恌惽慅憇憯懆懠懮懰扌扡扤捄掤揥旛昄晛晞晳晼暬栵桋棸楅楘楰榭樕橦檄檖檿歗殢毝氿汫淅淢渰湝滉满滮滺漘漙潀潝澒濔瀌烋烕焞煁熙燮燿爗爲牥犉獫珌琇琫璅璊璲璽畟疁疢痗痯痻瘉瘏盬睆睍瞏砅砠砯硘祋禴秠称稌穈穉穋穟篠簳籊粯粻糍糦紑紞紽綀綌緌緍緎缾罙罛罭罿羜羣羲翛翯翽翿膧舄舝荎荓葍葘葽蓫薖薫薿藘蘚虓蝃蝱螘蟢衱裊裛襋襢襭觼觿訧訩訿謊蹴軜軝軷輶迋逷遡遫遶醑醻鋭鍭閟陾隤霂霢靁鞃鞉鞗鞙鞞鞿韔韘韠頍颭飶餴饇饎饛饟駵駽騋騒騢騵驈驒驔驖髧鬵魗鮕鯮鰆鱆鱌鱱鱼鷕鷮鸒麌
