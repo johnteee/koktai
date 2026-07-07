@@ -106,7 +106,7 @@
 田 園 千 萬 甲 ， chhân-hn̂g chhaiⁿ-bān kah
 公 館 百 二 庄 ， kong-kóan pah-jī chng,
 奴 才 掃 地 煎 茶 湯 ； lô·-châi sàu-tè choaⁿ tê-thng,
-查 某 女間 捶 腰 骨 ， cha-bó·-kán tûi io-kut,
+查 某 𡢃 捶 腰 骨 ， cha-bó·-kán tûi io-kut,
 拌 眠 床 。 pōaⁿ bîn-chhn̂g.
 一 妻 一 妾 敖 佫 媠 ， Chi̍t-chhe chi̍t-chhiap gâu koh súi,
 就 勸 丈 夫 做 生 理 ， chiū khǹg tiōng-hu chòe seng-lí,
@@ -139,7 +139,7 @@
 講 叫 貨 物 買 全 備 ， kóng kiò hè-mi̍h bóe chôan-pī,
 若 毋 轉 鄉 里 ， nā m̄ tńg hiuⁿ-lí,
 恐 驚 生 理 綴 伊 去 , khióng-kiaⁿ seng-lí tè i khì,
-陷 眠 聽 見 著 ⻊百 起 ， hām-bîn thiaⁿ- -kìⁿ to̍h peh-khí,
+陷 眠 聽 見 著 𬦰 起 ， hām-bîn thiaⁿ- -kìⁿ to̍h peh-khí,
 目 屎 糊 目 墘 ， ba̍k-sái kô· ba̍k-kîⁿ,
 是 我 一 時 真 呆 痴 ， sī góa chi̍t-sî chin tai-chhi,
 看 見 蘇 州 婆 ， khòaⁿ-kìⁿ So·-chiu-pô,
@@ -257,7 +257,7 @@
 鏡面紐、紗線絪， kiàⁿ-bīn-liú, se-sòaⁿ-in,
 骹帛、飾褲佮鞋面； kha-pe̍h, sek-khò· kah oê-bīn,
 荷包鬚、褲頭綾， hâu-pau-chhiu, khò·-thâu-lêng,
-水晶鏡、玻璃燈， chúi-chiⁿ, po-lê-teng,
+水晶鏡、玻璃燈， chúi-chiⁿ-kiàⁿ, po-lê-teng,
 銀豆、八寶佮銜鈴， gûn-tāu, pat-pó kah hâm-lêng,
 羅經、八卦定時鐘； lô-kiⁿ, pat-kòa tēng-sî-cheng,
 腰刀、牙箸、玻璃盅. io-to, gê-tī, po-lê-cheng.
@@ -403,8 +403,8 @@
 白米糶未了， pe̍h-bí thiò bōe liáu,
 糴粟佫來挨； tia̍h-chhek koh lâi oe,
 姿娘儂， chu-niû-lâng,
-勿會當篩，總着挨， bōe-tàng thai, chóng to̍h oe,
-勿會當舂，總着耙； bōe-tàng cheng, chóng to̍h pê,
+袂當篩，總着挨， bōe-tàng thai, chóng to̍h oe,
+袂當舂，總着耙； bōe-tàng cheng, chóng to̍h pê,
 喙焦食冷水， chhùi-ta chia̍h léng-chúi,
 有儂食燒茶； ū lâng chia̍h sio-tê,
 卜放尿改換鞋， beh pàng-jiō, ké-oāⁿ oê,
@@ -414,7 +414,7 @@
 尚書、撫院、總督 siūⁿ-su, bú-īⁿ, chóng-tok,
 做一齊， chòe it-chôe,
 真怪意， chin koài-ì,
-予儂想勿會出即巧物， hō· lâng siūⁿ bōe chhut chit khá-mi̍h,
+予儂想袂出即巧物， hō· lâng siūⁿ bōe chhut chit khá-mi̍h,
 家內卜椅桌， ke-lāi beh í-toh,
 就倩師傅做敆作； chiū chhiàⁿ sai-hū chòe kap choh,
 先做長案八仙桌 seng chòe tn̂g-àn pat-sian-toh,
@@ -541,7 +541,7 @@
 32、撇：phiat，小瓷盤。
 33、玳瑁貓：貓身上的顏色（黑、黃、白）是混雜的，沒有有明顯界限的區分，有些有斑紋，有些只有黑黃兩色，總體不規律。這種貓統稱為玳瑁貓。它並不是貓的一個品種，而只是把有着這種毛色特質的貓稱玳瑁貓。
 34、金獅狗：毛色呈金黃色，外形有點像金毛獅一樣的狗。
-35、諸母 女間：cha-bó·-kán，婢女、侍女。
+35、諸母 𡢃：cha-bó·-kán，婢女、侍女。
 36、拌眠床：疊被子，整理床鋪。
 37、橫洋：可跑遠洋水路的大船。
 38、油車：以前榨油的設備或廠所。

@@ -89,11 +89,17 @@ def poj_to_tl_syl(poj_syl):
     return base + tone
 
 
+def _split_poj_syls(poj_text):
+    raw = re.split(r"[\s\u002d\u2010-\u2015]+", poj_text)
+    return [s for s in raw if s]
+
+
 def _split_line(line):
-    """將全文行拆成 (漢字列表, POJ 音節列表)。
+    """將全文行拆成 (漢字列表, POJ 音節序列列表)。
 
     格式：漢字 漢字 漢字 ， POJ POJ POJ,
     分界：第一個拉丁字母出現處。
+    斜線表示全詞或尾部變體：`lê-pē / lôe-pê` 兩讀都收。
     """
     m = re.search(r"[\u0041-\u005A\u0061-\u007A\u00C0-\u024F\u1E00-\u1EFF]", line)
     if not m:
@@ -104,12 +110,22 @@ def _split_line(line):
     han_part = re.sub(r"\([^)]*\)", "", han_part)
     han_chars = [c for c in han_part if HAN_RE.match(c)]
 
-    # POJ 側：去括號註記 → 標點換空白 → 拆音節
+    # POJ 側：去括號註記 → 標點換空白 → 斜線變體 → 拆音節
     poj_part = re.sub(r"\([^)]*\)", " ", poj_part)
     poj_part = _LATIN_PUNCT.sub(" ", poj_part)
-    raw = re.split(r"[\s\u002d\u2010-\u2015]+", poj_part)
-    poj_syls = [s for s in raw if s]
-    return han_chars, poj_syls
+    parts = [_split_poj_syls(p) for p in re.split(r"\s*/\s*", poj_part) if p.strip()]
+    if not parts:
+        return han_chars, []
+    base = parts[0]
+    variants = []
+    for part in parts:
+        if len(part) == len(base):
+            variants.append(part)
+        elif len(part) < len(base):
+            variants.append(base[:-len(part)] + part)
+        else:
+            variants.append(part)
+    return han_chars, variants
 
 
 def load_attestation(md_path=DEFAULT_MD):
@@ -142,20 +158,20 @@ def load_attestation(md_path=DEFAULT_MD):
             continue
         stats["lines"] += 1
 
-        han_chars, poj_syls = _split_line(line)
-        if not han_chars or not poj_syls:
-            stats["skipped"] += 1
-            continue
-        if len(han_chars) != len(poj_syls):
+        han_chars, poj_variants = _split_line(line)
+        if not han_chars or not poj_variants:
             stats["skipped"] += 1
             continue
 
         got = False
-        for han, poj in zip(han_chars, poj_syls):
-            tl = poj_to_tl_syl(poj)
-            if tl:
-                attest.setdefault((han, tl), set()).add("金")
-                got = True
+        for poj_syls in poj_variants:
+            if len(han_chars) != len(poj_syls):
+                continue
+            for han, poj in zip(han_chars, poj_syls):
+                tl = poj_to_tl_syl(poj)
+                if tl:
+                    attest.setdefault((han, tl), set()).add("金")
+                    got = True
         stats["aligned" if got else "skipped"] += 1
 
     stats["pairs"] = len(attest)
