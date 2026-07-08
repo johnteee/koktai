@@ -15,8 +15,11 @@ from build_unified_index import (  # noqa: E402
     Pingshui,
     Ytenx,
     add_ytenx_char_fallback,
+    build_reading_profile,
     derive_sim_tl,
+    enrich_mc_with_reading_profile,
     load_extra_chars,
+    norm_registers,
 )
 
 YTENX_ROOT = os.path.expanduser("~/dev/ytenx")
@@ -124,6 +127,89 @@ class JoinFanqieRegression(unittest.TestCase):
             self.assertEqual(load_extra_chars(path), ["嘯", "蕭"])
         finally:
             os.unlink(path)
+
+    def test_norm_registers_wenyin_wendu_jiewenyin_map_to_wen(self):
+        """文音、文讀、皆文音 → 文；可與其他已知語域並列。"""
+        self.assertEqual(norm_registers("文音"), ["文"])
+        self.assertEqual(norm_registers("文讀"), ["文"])
+        self.assertEqual(norm_registers("皆文音"), ["文"])
+        self.assertEqual(norm_registers("文音、白"), ["文", "白"])
+        self.assertEqual(norm_registers("皆文音，俗"), ["文", "俗"])
+
+    def test_norm_registers_wenbai_preserved(self):
+        """既有 文白 標籤仍整體保留，不拆成 文+白。"""
+        self.assertEqual(norm_registers("文白"), ["文白"])
+        self.assertEqual(norm_registers("文白、漳"), ["文白", "漳"])
+
+    def test_derive_sim_tl_keypoint_composed_from_reading_profile(self):
+        """反切上下字 reading_profile → 關鍵點拼讀候選，保留規則候選。"""
+        entry = self._mc_entry("而鄰", "真")
+        entry["reading_profile"] = {
+            "而": {"keypoints": [{"initial": "j", "tone": 5}]},
+            "鄰": {"keypoints": [{"final": "in", "tone": 5}]},
+        }
+        sim = derive_sim_tl(entry, self.ytenx)
+        self.assertIsNotNone(sim)
+
+        self.assertIn("jin5", sim["syllables"])
+        self.assertIn("lin5", sim["syllables"])
+        self.assertEqual(sim["tone"], 5)
+        self.assertEqual(sim["initial_category"], "日")
+
+        composed = sim.get("keypoint_composed") or []
+        self.assertIn("jin5", composed)
+
+    def test_build_reading_profile_splits_tl_into_initial_final_tone(self):
+        coll = Collector()
+        coll.add_pair("林", "lim5", regs=("文",), src="test")
+        kp = build_reading_profile(coll)["林"]["keypoints"][0]
+        self.assertEqual(kp["tl"], "lim5")
+        self.assertEqual(kp["initial"], "l")
+        self.assertEqual(kp["final"], "im")
+        self.assertEqual(kp["tone"], 5)
+
+    def test_build_reading_profile_ranks_wen_before_colloquial(self):
+        """文讀關鍵點優先於高頻白話讀。"""
+        coll = Collector()
+        for _ in range(10):
+            coll.add_pair("車", "tshia1", regs=("白",), src="test")
+        coll.add_pair("車", "tshiu1", regs=("文",), src="test")
+        kps = build_reading_profile(coll)["車"]["keypoints"]
+        self.assertEqual([k["tl"] for k in kps], ["tshiu1", "tshia1"])
+        self.assertTrue(kps[0]["literary"])
+        self.assertFalse(kps[1]["literary"])
+
+    def test_build_reading_profile_ranks_ganwen_before_colloquial(self):
+        """甘文佐證關鍵點優先於高頻白話讀。"""
+        coll = Collector()
+        for _ in range(5):
+            coll.add_pair("行", "hiann5", regs=("白",), src="test")
+        coll.add_pair("行", "hing5", regs=(), src="test")
+        attest = {("行", "hing5"): ("甘文",)}
+        kps = build_reading_profile(coll, attest=attest)["行"]["keypoints"]
+        self.assertEqual([k["tl"] for k in kps], ["hing5", "hiann5"])
+        self.assertTrue(kps[0]["literary"])
+
+    def test_enrich_mc_with_reading_profile_adds_keypoint_composed(self):
+        """既有 mc.sim_tl 以反切上下字關鍵點補強，且不殘留 reading_profile。"""
+        entry = self._mc_entry("而鄰", "真")
+        sim = derive_sim_tl(entry, self.ytenx)
+        self.assertIsNotNone(sim)
+        entry["sim_tl"] = {**sim, "syllables": ["lin1"]}
+
+        coll = Collector()
+        coll.add_pair("而", "jin5", regs=("文",), src="test")
+        coll.add_pair("鄰", "lin5", regs=("文",), src="test")
+        profile = build_reading_profile(coll)
+        coll.mc["人"] = [entry]
+
+        enriched, added = enrich_mc_with_reading_profile(
+            coll, self.ytenx, profile)
+        self.assertEqual(enriched, 1)
+        self.assertGreater(added, 0)
+        self.assertIn("keypoint_composed", entry["sim_tl"])
+        self.assertIn("jin5", entry["sim_tl"]["keypoint_composed"])
+        self.assertNotIn("reading_profile", entry)
 
 
 if __name__ == "__main__":

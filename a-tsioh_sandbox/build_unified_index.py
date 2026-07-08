@@ -285,8 +285,66 @@ def sim_confidence(method):
     return "low"
 
 
+# 台羅音節切分：聲母（最長匹配）＋韻母＋數字調。用於反切關鍵點拼讀。
+_TL_INITIALS = ("tsh", "ts", "ph", "th", "kh", "ng",
+                "b", "m", "g", "n", "l", "j", "p", "t", "k", "s", "h")
+
+
+def split_tl(tl):
+    """台羅音節 → (聲母, 韻母, 調)；無聲母回空字串。無法解析回 None。"""
+    m = re.match(r"^([a-z]+)([1-8])$", tl or "")
+    if not m:
+        return None
+    body, tone = m.group(1), int(m.group(2))
+    for ini in _TL_INITIALS:
+        if body.startswith(ini) and len(body) > len(ini):
+            return ini, body[len(ini):], tone
+    return "", body, tone
+
+
+# 反切關鍵點合成上限：上字取聲母（≤2 類）、下字取韻母（≤3 型）。
+# 反切上字對聲母的約束較緊，故聲母取窄；韻母容有開合/等第分歧，取略寬。
+KEYPOINT_INITIAL_CAP = 2
+KEYPOINT_FINAL_CAP = 3
+
+
+def _profile_parts(reading_profile, ch, key):
+    """由 reading_profile[ch].keypoints 取出某位（initial/final）的相異值，保序。"""
+    prof = (reading_profile or {}).get(ch) or {}
+    vals = []
+    for kp in prof.get("keypoints", ()):
+        val = kp.get(key)
+        if val is not None:
+            vals.append(val)
+    return unique(vals)
+
+
+def keypoint_compose(entry, tone):
+    """反切關鍵點拼讀：上字聲母 × 下字韻母 × 文讀調 → 台羅候選。
+
+    reading_profile[反切上字] 供聲母集、[反切下字] 供韻母集（取自各字實際台羅
+    讀音，見 build_reading_profile）。這正是反切「上字定聲母、下字定韻母」原則的
+    資料化：命中率靠選對關鍵字的聲/韻讀音。無 reading_profile 或反切不足二字回空。
+    """
+    profile = entry.get("reading_profile")
+    if not profile:
+        return []
+    speller = (entry.get("fanqie") or "").removesuffix("切")
+    if len(speller) < 2:
+        return []
+    upper, lower = speller[0], speller[1]
+    inits = _profile_parts(profile, upper, "initial")[:KEYPOINT_INITIAL_CAP]
+    finals = _profile_parts(profile, lower, "final")[:KEYPOINT_FINAL_CAP]
+    return unique(f"{ini}{fin}{tone}" for ini in inits for fin in finals)
+
+
 def derive_sim_tl(entry, ytenx):
-    """反切/中古地位 → 台羅文讀候選；不預測白話音。"""
+    """反切/中古地位 → 台羅文讀候選；不預測白話音。
+
+    規則候選：中古聲母類 × 平水預期韻母 × 文讀調。
+    關鍵點候選（keypoint_composed）：反切上/下字實際台羅讀音拼合（需 entry
+    帶 reading_profile；見 keypoint_compose）。兩者聯集為 syllables。
+    """
     psrec = entry.get("pingshui") or {}
     finals = psrec.get("expected_tl") or []
     if not finals:
@@ -307,10 +365,12 @@ def derive_sim_tl(entry, ytenx):
     if tone is None:
         return None
 
-    syllables = unique(
+    rule = unique(
         f"{initial}{final}{tone}" for initial in initials for final in finals)
-    return {
-        "syllables": syllables,
+    composed = keypoint_compose(entry, tone)
+
+    out = {
+        "syllables": unique(rule + composed),
         "initials": initials,
         "finals": finals,
         "tone": tone,
@@ -319,12 +379,23 @@ def derive_sim_tl(entry, ytenx):
         "source": source,
         "confidence": sim_confidence(join.get("method")),
     }
+    if composed:
+        out["keypoint_composed"] = composed
+    return out
 
 
 # ---------------------------------------------------------------- 語域
 REG_SPLIT = re.compile(r"[、，,/]")
 KNOWN_REGS = {"文", "語", "白", "漳", "泉", "廈", "俗", "又", "又音", "今",
               "舊", "訓", "替", "罕用", "文白"}
+# 語域別名 → 正規標籤。吳守禮原文用「文音／文讀／皆文音」等指同一文讀層；
+# 逐一正規化，命中率才不會因標籤字面差異而漏算文讀。刻意不映射語意雙關或
+# 字形史標籤（文語、古文、不分文白）——避免把非讀音說明誤標成文讀。
+REG_ALIAS = {
+    "文音": "文", "文讀": "文", "皆文音": "文", "皆文": "文",
+    "語音": "語", "今語音": "語", "舊語音": "語",
+    "俗音": "俗", "白話": "白", "白話音": "白",
+}
 
 
 def norm_registers(reg):
@@ -333,7 +404,8 @@ def norm_registers(reg):
     out = []
     for part in REG_SPLIT.split(reg):
         part = part.strip("　 ")
-        if part in KNOWN_REGS:
+        part = REG_ALIAS.get(part, part)
+        if part in KNOWN_REGS and part not in out:
             out.append(part)
     return out
 
@@ -394,6 +466,92 @@ def load_extra_chars(path):
                     seen.add(ch)
                     chars.append(ch)
     return chars
+
+
+def _pair_weight(ch, tl, p, attest=None):
+    tags = attest.get((ch, tl), ()) if attest else ()
+    return p["n"] + sum(DICT_WEIGHT.get(t, 0) for t in tags)
+
+
+def _is_literary_point(p, tags):
+    return any("文" in r for r in p["regs"]) or "甘文" in tags
+
+
+def _is_noncolloquial_point(p):
+    return not any(r in {"白", "語", "俗", "訓"} for r in p["regs"])
+
+
+def build_reading_profile(coll, attest=None):
+    """由現有 (漢字, 台羅) 讀音建立反切關鍵點表。
+
+    排序原則：文讀/甘文字音優先，其次非白/語/俗/訓，再其次全部讀音；同層按
+    koktai token 數＋外典佐證權重排序。這讓反切上字聲母、下字韻母優先取來源中
+    最可能的文讀關鍵點，而不是任取白話讀。
+    """
+    profile = defaultdict(list)
+    seen_tl = defaultdict(set)
+    for (ch, tl), p in coll.pairs.items():
+        parts = split_tl(tl)
+        if not parts:
+            continue
+        if tl in seen_tl[ch]:
+            continue
+        seen_tl[ch].add(tl)
+        ini, fin, tone = parts
+        tags = attest.get((ch, tl), ()) if attest else ()
+        w = _pair_weight(ch, tl, p, attest)
+        literary = _is_literary_point(p, tags)
+        noncol = _is_noncolloquial_point(p)
+        profile[ch].append({
+            "tl": tl,
+            "initial": ini,
+            "final": fin,
+            "tone": tone,
+            "w": w,
+            "n": p["n"],
+            "literary": literary,
+            "noncolloquial": noncol,
+        })
+    out = {}
+    for ch, pts in profile.items():
+        pts.sort(key=lambda p: (
+            0 if p["literary"] else 1 if p["noncolloquial"] else 2,
+            -p["w"], -p["n"], p["tl"]))
+        out[ch] = {"keypoints": pts}
+    return out
+
+
+def enrich_mc_with_reading_profile(coll, ytenx, profile):
+    """用反切上下字的既有讀音關鍵點補強 mc[].sim_tl。"""
+    enriched = added = 0
+    for entries in coll.mc.values():
+        for entry in entries:
+            if not (entry.get("sim_tl") and entry.get("fanqie")):
+                continue
+            speller = entry["fanqie"].removesuffix("切")
+            if len(speller) < 2:
+                continue
+            upper, lower = speller[0], speller[1]
+            if upper not in profile or lower not in profile:
+                continue
+            tmp = dict(entry)
+            tmp["reading_profile"] = {
+                upper: profile[upper],
+                lower: profile[lower],
+            }
+            sim = derive_sim_tl(tmp, ytenx)
+            if not sim:
+                continue
+            before = set((entry.get("sim_tl") or {}).get("syllables") or [])
+            after = set(sim.get("syllables") or [])
+            delta = after - before
+            if delta:
+                entry["sim_tl"] = sim
+                enriched += 1
+                added += len(delta)
+    coll.stats["sim_tl_keypoint_enriched"] = enriched
+    coll.stats["sim_tl_keypoint_added"] = added
+    return enriched, added
 
 
 def add_ytenx_char_fallback(coll, ytenx, ps, ch):
@@ -711,6 +869,11 @@ def main():
                     if add_ytenx_char_fallback(coll, ytenx, ps, ch))
         print(f"[index] 額外字頭：{added}/{len(extra_chars)} 字加入 ytenx fallback",
               file=sys.stderr)
+
+    reading_profile = build_reading_profile(coll, attest=attest)
+    enriched, added = enrich_mc_with_reading_profile(coll, ytenx, reading_profile)
+    print(f"[index] 反切關鍵點拼讀：{enriched} 筆 mc 補入 {added} 個候選",
+          file=sys.stderr)
 
     meta = {
         "generator": "a-tsioh_sandbox/build_unified_index.py",
