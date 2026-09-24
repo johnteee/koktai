@@ -1,0 +1,20 @@
+# 具名問責閘（approval gate）模板：envelope pause_actions 的每一項都走此閘。
+# 人類欄位（approver）留空待人類填寫——見註解；worker 不得寫入此檔（constitutional path）。
+approval:
+  owner: "control-owner"
+  # approver 由人類 control-owner 於流程外填入具名信箱；空白表示尚未核准。
+  approver: ""
+  authority_basis: "envelope pause_actions + constitutional.yaml policy_activation"
+  action: ""
+  decision: pending
+  rationale: ""
+  expires_at: ""
+  provenance:
+    issued_out_of_band: true
+    worker_writable: false
+    integrity_evidence: ""
+roles:
+  requester: "codex-bounded-worker"
+  approver: "control-owner（人類，見 approver 欄）"
+  executor: "human（核准後由人類執行 pause_actions，如 git commit/push）"
+  evidence_recorder: "host（guard/scope 快照 + git history）"

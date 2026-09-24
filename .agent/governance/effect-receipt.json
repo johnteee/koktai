@@ -1,0 +1,22 @@
+{
+  "_note": "本 repo 沒有 broker 接線：任何寫進 repo 內的 receipt 都是 worker 自述（self-report），不是 broker 證據。真正的 effect_receipt 必須由 host broker 從 worker 不可寫的 append-only store 簽發；此檔只是模板，證明欄位形狀。",
+  "proposal": {
+    "action": "edit_file",
+    "target": "a-tsioh_sandbox/build_unified_index.py",
+    "authorization_id": "auth-20260924-fanqie-001"
+  },
+  "authorization": {
+    "authorization_id": "auth-20260924-fanqie-001",
+    "decision": "allow",
+    "scope": ["a-tsioh_sandbox/build_unified_index.py"],
+    "expires_at": ""
+  },
+  "effect_receipt": {
+    "status": "committed",
+    "issued_by": "broker",
+    "receipt_store": "broker_owned_append_only",
+    "integrity_evidence": "",
+    "before_hash": "",
+    "after_state": ""
+  }
+}

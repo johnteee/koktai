@@ -1,0 +1,17 @@
+# 意圖記錄（intent-record）：fanqie sim_tl 命中率任務，簽署前不得實跑。
+intent_id: "intent-20260924-fanqie-001"
+goal: "把 fanqie 反切 sim_tl 對既有文讀的 any-hit 命中率推高到 0.7895 以上，同時平均候選數不超過 4.36，且除 mc/pingshui 外的 index 欄位零變動"
+out_of_scope:
+  - "git commit / git push（pause_actions，人類執行）"
+  - "覆寫已入庫的 index/ 或 json/"
+  - "修改 ExternalRef/ 或 a-tsioh_sandbox/data/*.json 先驗表"
+  - "新增外部依賴或網路存取"
+  - "改寫憲法路徑（.agent/**、checks/、acceptance.yaml、flows/、tests、VERIFY.md、features/）"
+unknowns:
+  - {item: "集韻資料是否可取得、可否作為新增先驗", owner: "human"}
+  - {item: "ytenx 上游是否有影響反切的新 commit", owner: "human"}
+  - {item: "命中率上限是否被既有文讀標註稀疏度卡住", owner: "codex-bounded-worker（triage 回報）"}
+irreversible_assumptions: []
+# signed_by 由人類 control-owner 於流程外填入；空白表示尚未簽署。
+signed_by: ""
+status: unsigned

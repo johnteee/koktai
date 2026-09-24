@@ -1,0 +1,51 @@
+# Oracle 清單（oracle-manifest）：執行者不得編輯；改動走流程外 out-of-band。
+spec_version: 1
+oracles:
+  - name: AC1-dic-parse-totals
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: AC2-index-reproducible
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: AC3-fanqie-unittests
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: AC4-poj-golden
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: AC5-fanqie-literary-hit-rate
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: fanqie-target.sh（loop 真值層：guard→scope→unittest→build-index→index-parity→hit-rate）
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: test_join_fanqie.py（AC3 測試本體）
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: loop_targets（envelope：min_hit_rate 0.7895，max_avg_candidates 4.36）
+    class: authoritative
+    owner: human
+    host_seal: none
+    change_protocol: out_of_band
+  - name: worker 新增的單元測試
+    class: developer
+    owner: codex-bounded-worker
+    host_seal: none
+    change_protocol: in_run_add_only
+# 誠實註記：host_seal 全部是 none——acceptance.yaml 的 0444 檔案權限不是 seal，
+# agent 一個 chmod 就能改；真正的 seal（write protection / protected branch /
+# CI ownership）目前都沒有（unmet）。

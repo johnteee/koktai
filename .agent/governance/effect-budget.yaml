@@ -1,0 +1,20 @@
+# 累積 effect 預算：按授權 lease 鍵控（invariant #9），不是按 session。
+# 數字與 .agent/delivery/envelope.yaml 一致：max_iterations 6 → max_operations 6；
+# workspace 寫入只允許 1 個檔；外部收件者 0。
+cumulative_effect_key:
+  principal: ""
+  purpose: "fanqie-sim-tl-hit-rate"
+  authorization_id: "auth-20260924-fanqie-001"
+  resource_domain: "repository:koktai"
+effect_budget:
+  max_operations: 6
+  max_files_touched: 1
+  max_external_recipients: 0
+  valid_until: ""
+  reset_requires: "new_out_of_band_authorization"
+cross_purpose_budget:
+  key:
+    principal: ""
+    resource_domain: "repository:koktai"
+  max_operations_across_authorizations: 12
+  reset_requires: "new_out_of_band_authorization"

@@ -1,0 +1,30 @@
+# Escalate 述詞（機器讀取）：任一為真即停並上報，不自行重試相同策略。
+escalate_if:
+  - predicate: spec.missing_fields
+    fields: ["target", "acceptance"]
+    action: escalate
+  - predicate: tests.consecutive_failures
+    condition: ">= 2"
+    action: escalate
+  - predicate: diff.touches_outside_contract_scope
+    allowed: ["a-tsioh_sandbox/build_unified_index.py"]
+    action: escalate
+  - predicate: authorization.state_predicate_invalid
+    state_predicate:
+      repo_head: cc306005f532ecfff2484a10357ae6e507a3f06c
+      policy_epoch: 1
+      ytenx_commit: 5f085b0cf4019b1dc10d120cfc62bbf6fcfd87fe
+    action: escalate
+  - predicate: guard.fail
+    source: "python3 checks/koktai_checks.py guard --check $KOKTAI_GUARD"
+    action: abort_and_escalate
+  - predicate: hit_rate.reached_but_avg_candidates_over_cap
+    min_hit_rate: 0.7895
+    max_avg_candidates: 4.36
+    action: escalate
+  - predicate: ytenx.commit_mismatch
+    pinned: 5f085b0cf4019b1dc10d120cfc62bbf6fcfd87fe
+    action: escalate
+  - predicate: effect.cumulative_budget_exceeded
+    budget_ref: effect-budget.yaml
+    action: abort_and_escalate

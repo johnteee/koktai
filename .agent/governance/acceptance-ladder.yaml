@@ -1,0 +1,34 @@
+# 驗收梯（acceptance ladder L0–L5）：對應 koktai 具體檢查。
+# L0 只是閘門，不是 accepter；重複 L0 失敗 → 上報，不無限重產。
+ladder:
+  - level: L0
+    name: artifact_integrity
+    checks:
+      - "產物存在/大小/雜湊/清單（build-index 輸出四檔齊全）"
+    gate_only: true
+  - level: L1
+    name: structural_validity
+    checks:
+      - "bash -n flows/*.sh .agent/governance/run-codex.sh"
+      - "python3 -m py_compile a-tsioh_sandbox/build_unified_index.py"
+      - "json parse：scratch/index/*.json 可解析"
+  - level: L2
+    name: behavioral_validity
+    checks:
+      - "checks/fanqie-target.sh 全綠（含 hit-rate ≥ 0.7895 且 avg_cand ≤ 4.36）"
+      - "python3 checks/koktai_checks.py unittest --min-tests 13"
+  - level: L3
+    name: regression_validity
+    checks:
+      - "checks/verify.sh AC1–AC5 全綠（human re-baseline 後對 HEAD；index-parity --allow mc,pingshui）"
+      - "python3 checks/koktai_checks.py poj-gold --min-ok 3554 --total 3638"
+  - level: L4
+    name: scope_validity
+    checks:
+      - "python3 checks/koktai_checks.py scope --check $KOKTAI_SCOPE --allow a-tsioh_sandbox/build_unified_index.py"
+      - "python3 checks/koktai_checks.py guard --check $KOKTAI_GUARD"
+  - level: L5
+    name: intent_validity
+    checks:
+      - "具名 accepter 審查 hit-rate miss 樣本後關閉 acceptance-record.yaml"
+    acceptor_required: true

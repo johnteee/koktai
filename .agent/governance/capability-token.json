@@ -1,0 +1,17 @@
+{
+  "authorization_id": "auth-20260924-fanqie-001",
+  "capability_class": "workspace_write",
+  "principal": "",
+  "principal_note": "human-owned：由 control-owner（人類）簽發 intent 後填入；空白表示尚未授權",
+  "delegated_to": "codex-bounded-worker",
+  "purpose": "fanqie-sim-tl-hit-rate",
+  "resource_scope": ["a-tsioh_sandbox/build_unified_index.py"],
+  "allowed_effects": ["read", "write_build_unified_index_only", "run_checks_readonly", "write_scratch_outside_repo"],
+  "forbidden_effects": ["network_send", "credential_read", "git_commit", "git_push", "write_constitutional", "write_index_or_json_into_repo", "edit_prior_tables", "add_dependency"],
+  "state_predicate": {
+    "repo_head": "cc306005f532ecfff2484a10357ae6e507a3f06c",
+    "policy_epoch": 1,
+    "ytenx_commit": "5f085b0cf4019b1dc10d120cfc62bbf6fcfd87fe"
+  },
+  "expires_at": ""
+}

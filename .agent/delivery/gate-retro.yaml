@@ -1,0 +1,31 @@
+# Gate retro：哪個閘開火、哪個被繞過、哪個什麼都沒抓到；policy change 永遠不等於 activation。
+gates:
+  - name: intent
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: spec
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: plan
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: execution
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: verification
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: acceptance
+    fired: false
+    bypassed: false
+    caught_nothing: false
+  - name: retro
+    fired: false
+    bypassed: false
+    caught_nothing: false
+policy_change: separate_from_activation

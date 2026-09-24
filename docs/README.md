@@ -16,6 +16,7 @@
 | [external-references.md](external-references.md) | `ExternalRef/` 外部文件盤點、可用性、取用方式 |
 | [scripts-inventory.md](scripts-inventory.md) | 腳本與資源全清單（現役管線＋legacy＋外部依賴） |
 | [methodology.md](methodology.md) | 可複用方法論：無損原則、parity 驗證、join 設計、除錯教訓 |
+| [../VERIFY.md](../VERIFY.md) | 驗證控制面：doctor、全掃（`checks/verify.sh`，對 `acceptance.yaml` AC1–AC5）、失敗四分類；功能分區在 [../features/](../features/README.md) |
 
 ## 快速上手
 
@@ -32,6 +33,9 @@ python3 a-tsioh_sandbox/build_unified_index.py \
 
 # 3.（選用）台羅→白話字轉換器黃金測試
 python3 a-tsioh_sandbox/chhoetaigi.py --validate-poj
+
+# 4. 驗證全掃（約 35 秒；只寫 repo 外 scratch，不覆寫 json/、index/）
+checks/verify.sh
 ```
 
 ## 語料規模（2026-07 全量重建實測）
@@ -43,10 +47,10 @@ python3 a-tsioh_sandbox/chhoetaigi.py --validate-poj
 | 單字條目（`.本文`） | 12,857 |
 | 詞條（`~t96;【…】`） | 43,913 |
 | 反切引註（單字頭） | 11,002 |
-| 索引漢字 | 10,026 |
+| 索引漢字 | 10,185 |
 | 索引台羅音節 | 3,272 |
 | （漢字, 台羅）讀音對 | 28,758（聚合自 627,497 個對齊 token） |
-| ChhoeTaigi＋詞彙比較 佐證 | 15,234 對（53.0%）；token 質量覆蓋 88.5% |
+| ChhoeTaigi＋詞彙比較 佐證 | 15,244 對（53.0%）；token 質量覆蓋 88.7% |
 | 方言腔別層（教育部詞彙比較） | 1,937 讀音對帶十腔別（鹿泉…高混） |
 
 ## 主要程式

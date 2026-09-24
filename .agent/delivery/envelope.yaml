@@ -1,0 +1,29 @@
+# Autonomy envelope（governed-delivery）：無人值守 run 前由 accepter 核定；run 超出即停。
+# executing agent 不得編輯（constitutional path：.agent/**）。
+# 機器讀取：checks/koktai_checks.py hit-rate --targets 以行解析 loop_targets（扁平 `key: number`）。
+spec_version: 1
+task: fanqie-sim-tl-hit-rate            # 提升 mc[].sim_tl 對既有文讀的 any-hit 命中率
+budget:
+  max_iterations: 6                     # flows/fanqie-loop.sh MAX_ITER 上限
+  per_call_timeout_seconds: 1800        # 每次 agent 呼叫 timeout(1)
+  max_triage_branches: 8                # flows/fanqie-miss-triage.sh 分桶上限
+  max_parallel_agents: 4
+loop_targets:
+  min_hit_rate: 0.7895                  # 基線 4173/5286 = 0.78944；須嚴格提升
+  max_avg_candidates: 4.36              # 基線 4.355；禁止以擴張候選集換命中率
+pause_actions:                          # 每次都要 human 決定，loop 內不得自行執行
+  - "git commit / git push"
+  - "覆寫 index/ 或 json/（重建產物入庫）"
+  - "修改 ExternalRef/ 或 a-tsioh_sandbox/data/*.json 先驗表"
+  - "新增外部依賴或網路存取"
+kill_conditions:
+  - "guard FAIL（憲法路徑被改）"
+  - "同一 failure signature 修正後重現（見 failure-log.yaml）"
+  - "verify.sh 結束碼 2（harness 不可信）"
+  - "修改超出 task-packet.yaml files 範圍"
+failure_signature_limit: 2              # 本任務宣告；同 signature 第 2 次 → rollback/換策略/escalate
+allowed_sinks:
+  - "workspace: a-tsioh_sandbox/build_unified_index.py"
+  - "scratch: $TMPDIR/koktai-*（repo 外）"
+accepter: ""                            # 待 human 填入具名 accepter
+strictness: L3

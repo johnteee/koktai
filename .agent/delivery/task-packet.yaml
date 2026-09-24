@@ -1,0 +1,13 @@
+# Task packet：工作的唯一 source of record（不是 transcript）。
+# 缺 acceptance criterion 即停並修 packet，不開工。
+spec_version: 1
+state_ledger_ref: "evidence-ledger.yaml"
+oracle_manifest_ref: "oracle-manifest.yaml"
+files:
+  - "a-tsioh_sandbox/build_unified_index.py"
+missing_acceptance: stop_and_repair
+acceptance:
+  - "hit-rate ≥ 0.7895（envelope loop_targets.min_hit_rate）"
+  - "avg candidates ≤ 4.36（envelope loop_targets.max_avg_candidates）"
+  - "index-parity --allow mc,pingshui：其餘欄位與 HEAD 位元一致"
+  - "verify.sh AC1–AC5 全綠"

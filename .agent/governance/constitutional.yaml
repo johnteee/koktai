@@ -1,0 +1,39 @@
+# 憲法路徑（control plane）：governed worker 不得寫入；只能由 control-owner 於 agent 流程外變更並另行 activation。
+# 機器讀取：checks/koktai_checks.py guard 以行解析 worker_writable_exclusions.deny_write 清單
+#   （每行 `    - "glob"`；fnmatch 語意，`*` 可跨 `/`；相對 repo 根目錄）。改格式前先改 guard。
+# 注意：guard 是事後偵測（loop 每輪驗證時比對雜湊快照），不是寫入前阻擋；阻擋需 host 權限模式（見 README.md）。
+constitutional_paths:
+  - ".agent/**"
+  - "acceptance.yaml"
+  - "checks/**"
+  - "flows/**"
+  - "a-tsioh_sandbox/test_*.py"
+  - "VERIFY.md"
+  - "features/**"
+constitutional_verifiers:          # worker 不得削弱；刪測試或放寬斷言一律高風險 diff
+  - "acceptance.yaml"
+  - "checks/koktai_checks.py"
+  - "checks/verify.sh"
+  - "checks/fanqie-target.sh"
+  - "a-tsioh_sandbox/test_join_fanqie.py"
+task_mutable_tests: []             # 本 repo 無另設 task-mutable 測試目錄；新增測試須經 human 納入上列
+worker_writable_exclusions:
+  deny_write:
+    - ".agent/*"
+    - "acceptance.yaml"
+    - "checks/*"
+    - "flows/*"
+    - "a-tsioh_sandbox/test_*.py"
+    - "VERIFY.md"
+    - "features/*"
+  enforcement_owner: "host_runtime"
+  detection_owner: "checks/koktai_checks.py guard（事後雜湊比對）"
+policy_activation:
+  proposed_by: "policy-editor"
+  activation_event: { type: "human_signed", actor: "control-owner", out_of_band: true }
+  activation_store: "control_plane_append_only"   # host 提供；repo 內檔案 worker 可寫，不算 activation store
+  worker_may_write_activation_record: false
+  same_transaction_as_policy_change: false
+  activation_epoch: 1
+  usable_by_existing_leases: false
+# policy change ≠ policy activation；回退到較弱版本也是 change，需同樣儀式（單調性）。

@@ -1,0 +1,28 @@
+# koktai 驗收規格（LOCKED：檔案權限 0444；僅能由 human owner 於 agent 流程外修改）
+# 產物與此規格不符時，先依 VERIFY.md 分類：product regression / spec-oracle error。
+# 驗證者不得為了讓檢核通過而改此檔、checks/、或 a-tsioh_sandbox/test_*.py。
+#
+# 格式約束（checks/verify.sh 以行解析，不用 YAML 函式庫）：
+#   每個 check 恰一行 `run:`，以 bash 在 repo 根目錄執行；結束碼 0 PASS／1 FAIL／2 HARNESS。
+#   `$KOKTAI_SCRATCH` 由 verify.sh 設為 repo 外的暫存目錄；check 依序執行（後者用前者產物）。
+spec_version: 1
+locked_at: 2026-09-24
+baseline_commit: cc306005f532ecfff2484a10357ae6e507a3f06c
+environment:
+  ytenx_commit: 5f085b0cf4019b1dc10d120cfc62bbf6fcfd87fe   # ~/dev/ytenx；變動 → AC2 可能 HARNESS 級差異
+checks:
+  - id: AC1-dic-parse-totals
+    invariant: 26 卷 .dic 經 recode→dic2json→rt2pronun 全部成功，結構總數不變（docs/pipeline.md 各卷統計表）
+    run: python3 checks/koktai_checks.py rebuild-json --expect-totals 1446,12857,43913,11002
+  - id: AC2-index-reproducible
+    invariant: 由 AC1 重建的 JSON 產生之統一索引四檔，與 git HEAD 的 index/ 位元一致
+    run: python3 checks/koktai_checks.py build-index && python3 checks/koktai_checks.py index-parity --ref HEAD
+  - id: AC3-fanqie-unittests
+    invariant: test_join_fanqie 全過、不得被略過、測試數不得少於 13
+    run: python3 checks/koktai_checks.py unittest --min-tests 13
+  - id: AC4-poj-golden
+    invariant: 台羅→白話字轉換對 ChhoeTaigi 黃金對 3638 組，至少 3554 組相符（97.69%）
+    run: python3 checks/koktai_checks.py poj-gold --min-ok 3554 --total 3638
+  - id: AC5-fanqie-literary-hit-rate
+    invariant: mc[].sim_tl 對既有文讀（registers 含「文」或 attest 含「甘文」）any-hit ≥ 4173 且平均候選 ≤ 4.36
+    run: python3 checks/koktai_checks.py hit-rate --min-hits 4173 --max-avg-cand 4.36

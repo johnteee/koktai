@@ -1,0 +1,33 @@
+# Evidence ledger：每條有名 claim、source、attester（工具名，不是 agent）、freshness、date。
+# agent 的轉述不是 attester；工具輸出才是證據。
+entries:
+  - claim: "repo HEAD 為 cc306005f532ecfff2484a10357ae6e507a3f06c"
+    source: "git rev-parse HEAD"
+    attester: "git"
+    freshness_kind: immutable_pin
+    date_checked: 2026-09-24
+  - claim: "ytenx 依賴在 ~/dev/ytenx @ 5f085b0c"
+    source: "acceptance.yaml environment.ytenx_commit"
+    attester: "yaml-reader"
+    freshness_kind: immutable_pin
+    date_checked: 2026-09-24
+  - claim: "AC 總數：章,單字,詞條,反切 = 1446,12857,43913,11002"
+    source: "acceptance.yaml AC1 rebuild-json --expect-totals"
+    attester: "checks/koktai_checks.py"
+    freshness_kind: recheck_date
+    date_checked: 2026-09-24
+  - claim: "POJ gold 3554/3638（97.69%）"
+    source: "acceptance.yaml AC4 poj-gold --min-ok 3554 --total 3638"
+    attester: "checks/koktai_checks.py"
+    freshness_kind: recheck_date
+    date_checked: 2026-09-24
+  - claim: "hit-rate 基線 4173/5286（avg cand 4.36），健康樹上 fanqie-target.sh 因 0.7894 < 0.7895 而 FAIL"
+    source: "checks/fanqie-target.sh → hit-rate --targets envelope.yaml"
+    attester: "checks/koktai_checks.py"
+    freshness_kind: recheck_date
+    date_checked: 2026-09-24
+  - claim: "full verify 約 32s；json rebuild 約 22s；index build 約 7s"
+    source: "task brief 基線量測"
+    attester: "human-reported"
+    freshness_kind: recheck_date
+    date_checked: 2026-09-24

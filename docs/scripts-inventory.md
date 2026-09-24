@@ -13,6 +13,18 @@
 | `a-tsioh_sandbox/chhoetaigi.py` | Py3 | ChhoeTaigi CSV 載入庫：KipInput 正規化、漢字↔音節逐位對齊（佐證表）、POJ 黃金對；`--validate-poj`（轉換器黃金測試）、`--attest-stats` |
 | `a-tsioh_sandbox/sutian.py` | Py3 | 教育部辭典附錄載入庫：詞彙比較（十腔別、佐證 `比`、陽上 6→7 摺疊）＋新詞/共同詞/俗諺（佐證 `新`/`共`/`諺`、「/」變體、俗諺句級對齊） |
 
+## 驗證與治理（agent 控制面）
+
+| 檔案 | 語言 | 角色 |
+|---|---|---|
+| `VERIFY.md`、`features/*.md` | 文件 | 驗證地圖：doctor／全掃／失敗四分類；五個功能區的驅動命令與預期輸出 |
+| `acceptance.yaml` | YAML（0444） | 鎖定驗收 AC1–AC5；`checks/verify.sh` 逐行執行其 `run:` |
+| `checks/koktai_checks.py` | Py3 | 檢核子命令：`rebuild-json`／`build-index`／`index-parity`／`unittest`／`poj-gold`／`hit-rate`／`guard`／`scope`；結束碼 0/1/2 = PASS/FAIL/HARNESS |
+| `checks/doctor.sh`、`checks/verify.sh` | bash | 環境體檢；全掃（scratch 在 repo 外） |
+| `checks/fanqie-target.sh` | bash | 命中率 loop 的真值層（門檻讀 `.agent/delivery/envelope.yaml`） |
+| `flows/fanqie-miss-triage.sh`、`flows/fanqie-loop.sh` | bash | 未命中分桶 triage（fan-out/fan-in，唯讀）；verify-gated 修復迴圈（見 `flows/README.md`） |
+| `.agent/governance/`、`.agent/delivery/` | 合約 | 四權分立、run 介面 `run-codex.sh`、憲法路徑；governed-delivery 合約集（status：artifact-complete） |
+
 ## 資料資源
 
 | 檔案 | 內容 |

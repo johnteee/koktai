@@ -1,0 +1,6 @@
+# Failure log：失敗簽名（oracle＋error_class＋surface，對應 loop 的 `[FAIL] <name>`）。
+# 同一簽名修正後重現 → 不再同策略重試：rollback 到上一個 verified ledger 狀態、
+# 換策略、或 escalate（見 exit 欄）。上限見 envelope failure_signature_limit: 2。
+entries: []
+signature_fields: ["oracle", "error_class", "surface"]
+exit_on_repeat: ["rollback", "strategy_change", "escalate"]

@@ -1,0 +1,10 @@
+# Acceptance record：執行成功 alone 永不關閉本檔；具名 accepter 對 oracle＋產品證據關閉。
+spec_version: 1
+# accepter 由人類填入具名信箱；空白表示尚未指派、尚未關閉。
+accepter: ""
+oracle_manifest_ref: "oracle-manifest.yaml"
+product_evidence_refs:
+  - "hit-rate PASS 輸出（含 --dump-misses 分桶）"
+  - "verify.sh AC1–AC5 PASS 輸出"
+  - "guard --check / scope --check PASS 輸出"
+closed: false

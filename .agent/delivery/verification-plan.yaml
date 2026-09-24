@@ -1,0 +1,25 @@
+# Verification plan：高風險 PASS 至少要一個非模型通道。
+channels:
+  - kind: deterministic
+    examples: ["checks/verify.sh AC1–AC5", "checks/fanqie-target.sh", "guard --check", "scope --check"]
+    independent: true
+  - kind: runtime
+    examples: ["build-index 產物存在/大小/雜湊", "hit-rate miss 分桶（--dump-misses）"]
+    independent: true
+  - kind: external_primary
+    examples: []
+    independent: true
+  - kind: independent_model
+    examples: ["flows/fanqie-miss-triage.sh 的 miss 分桶 triage"]
+    independent: false
+    note: "triage 分支與 proposer 同屬 codex 家族——不是獨立驗證，只能警告/阻擋，不能單獨放行"
+  - kind: self_assessment
+    examples: ["worker 自測小結"]
+    independent: false
+    releasing: false
+high_risk_pass_requires_non_model: true
+compatibility_bounds:
+  python: "3.14.7 tested"
+  codex_cli: "0.156.1"
+  ytenx: "5f085b0c"
+  repo: "cc306005"
